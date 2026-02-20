@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WMC Health — Marketing Intelligence Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0D2B45;
+    --teal: #0E7C7B;
+    --teal-light: #13A89E;
+    --gold: #E8A838;
+    --red: #C94040;
+    --green: #2D9E5F;
+    --bg: #F4F6F9;
+    --card: #FFFFFF;
+    --text: #1A2E3B;
+    --muted: #6B7E8E;
+    --border: #DDE3EA;
+    --sidebar-w: 220px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* animations disabled */
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-w);
+    min-width: var(--sidebar-w);
+    background: var(--navy);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: fit-content;
+    min-height: 100vh;
+    z-index: 100;
+    flex-shrink: 0;
+  }
+
+  .sidebar-logo {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .sidebar-logo .logo-mark {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: #fff;
+    line-height: 1;
+  }
+
+  .sidebar-logo .logo-sub {
+    font-size: 10px;
+    color: var(--teal-light);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .sidebar-section {
+    padding: 20px 16px 8px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.35);
+  }
+
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    border-radius: 8px;
+    margin: 2px 8px;
+    transition: all 0.2s;
+    font-size: 13px;
+  }
+
+  .sidebar-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+  .sidebar-item.active { background: var(--teal); color: #fff; }
+
+  .sidebar-item .icon { width: 16px; text-align: center; font-size: 14px; }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 16px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+  }
+
+  .sidebar-footer strong { display: block; color: rgba(255,255,255,0.7); }
+
+  /* MAIN */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .topbar-left h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--navy);
+  }
+
+  .topbar-left p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .date-range {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .date-range select {
+    border: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    outline: none;
+  }
+
+  .btn-export {
+    background: var(--teal);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-export:hover { background: var(--teal-light); }
+
+  /* CONTENT */
+  .content { padding: 28px 32px; }
+
+  /* ALERT BANNER */
+  .alert-banner {
+    background: linear-gradient(135deg, #FFF8EC, #FFF3D6);
+    border: 1px solid #F0C97A;
+    border-left: 4px solid var(--gold);
+    border-radius: 10px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    color: #7A5200;
+    animation: slideDown 0.4s ease;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* KPI CARDS */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+
+  .kpi-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .kpi-card.teal::after { background: var(--teal); }
+  .kpi-card.gold::after { background: var(--gold); }
+  .kpi-card.green::after { background: var(--green); }
+  .kpi-card.navy::after { background: var(--navy); }
+
+  .kpi-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .kpi-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    color: var(--navy);
+    line-height: 1;
+  }
+
+  .kpi-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-size: 12px;
+  }
+
+  .badge-up { color: var(--green); font-weight: 600; }
+  .badge-down { color: var(--red); font-weight: 600; }
+  .kpi-compare { color: var(--muted); }
+
+  .kpi-icon {
+    position: absolute;
+    top: 18px; right: 18px;
+    font-size: 22px;
+    opacity: 0.12;
+  }
+
+  /* CHART ROWS */
+  .chart-row {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .chart-row.two-col { grid-template-columns: 2fr 1fr; }
+  .chart-row.three-col { grid-template-columns: 1fr 1fr 1fr; }
+  .chart-row.one-col { grid-template-columns: 1fr; }
+
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .chart-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--navy);
+  }
+
+  .chart-subtitle {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .chart-legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .legend-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 4px;
+  }
+
+  /* SVG CHARTS */
+  svg { width: 100%; overflow: visible; }
+
+  /* FUNNEL */
+  .funnel-wrap { padding: 8px 0; }
+
+  .funnel-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .funnel-label { font-size: 12px; color: var(--muted); width: 120px; text-align: right; }
+
+  .funnel-bar-wrap { flex: 1; background: #EEF1F5; border-radius: 4px; height: 28px; position: relative; overflow: hidden; }
+
+  .funnel-bar {
+    height: 100%;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    padding-left: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    transition: width 1s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .funnel-pct { font-size: 12px; color: var(--muted); width: 50px; text-align: right; }
+
+  /* CHANNEL TABLE */
+  .channel-table { width: 100%; border-collapse: collapse; }
+  .channel-table th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding: 0 12px 10px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 500;
+  }
+  .channel-table td {
+    padding: 11px 12px;
+    font-size: 13px;
+    border-bottom: 1px solid #F0F3F6;
+    vertical-align: middle;
+  }
+  .channel-table tr:last-child td { border-bottom: none; }
+  .channel-table tr:hover td { background: #F9FAFB; }
+
+  .channel-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+
+  .mini-bar-wrap { width: 80px; background: #EEF1F5; border-radius: 3px; height: 6px; display: inline-block; vertical-align: middle; }
+  .mini-bar { height: 6px; border-radius: 3px; }
+
+  .trend-up { color: var(--green); font-size: 12px; font-weight: 600; }
+  .trend-down { color: var(--red); font-size: 12px; font-weight: 600; }
+  .trend-flat { color: var(--muted); font-size: 12px; }
+
+  /* SERVICE LINE */
+  .service-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .service-item {
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .service-icon {
+    display: none;
+  }
+
+  .service-name { font-size: 12px; color: var(--muted); }
+  .service-val { font-size: 18px; font-weight: 600; color: var(--navy); }
+  .service-chg { font-size: 11px; }
+
+  /* CONSENT */
+  .consent-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .consent-row:last-child { border-bottom: none; }
+
+  .consent-pct {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--navy);
+  }
+
+  .consent-bar-wrap { width: 100px; background: #EEF1F5; border-radius: 3px; height: 6px; }
+  .consent-bar { height: 6px; border-radius: 3px; background: var(--teal); }
+
+  /* ALERTS TABLE */
+  .alert-table { width: 100%; border-collapse: collapse; }
+  .alert-table td { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: top; }
+  .alert-table tr:last-child td { border-bottom: none; }
+
+  .alert-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .pill-warn { background: #FFF3D6; color: #9A6700; }
+  .pill-ok { background: #E6F7EE; color: #1A7A42; }
+  .pill-info { background: #E6F0FF; color: #1A4FA0; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .kpi-card:nth-child(1) { animation-delay: 0.05s; }
+  .kpi-card:nth-child(2) { animation-delay: 0.1s; }
+  .kpi-card:nth-child(3) { animation-delay: 0.15s; }
+  .kpi-card:nth-child(4) { animation-delay: 0.2s; }
+
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 4px;
+  }
+  .tab {
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+  .tab.active { background: #fff; color: var(--navy); font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+
+
+  * { animation: none !important; animation-delay: 0s !important; opacity: 1 !important; transform: none !important; transition: none !important; }
+  .funnel-bar { width: attr(style width) !important; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">WMCHealth</div>
+    <div class="logo-sub">Marketing Intelligence</div>
+  </div>
+
+  <div class="sidebar-section">Overview</div>
+  <div class="sidebar-item active">Dashboard</div>
+  <div class="sidebar-item">Campaign ROI</div>
+  <div class="sidebar-item">Service Lines</div>
+
+  <div class="sidebar-section">Channels</div>
+  <div class="sidebar-item">Email</div>
+  <div class="sidebar-item">Paid Search</div>
+  <div class="sidebar-item">Social</div>
+  <div class="sidebar-item">Organic</div>
+
+  <div class="sidebar-section">Data</div>
+  <div class="sidebar-item">Salesforce Sync</div>
+  <div class="sidebar-item">Consent Mgmt</div>
+  <div class="sidebar-item">Settings</div>
+
+  <div class="sidebar-footer">
+    <strong>Jason Chae</strong>
+    Manager, Digital Analytics
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Campaign Performance Overview</h1>
+      <p>Last refreshed: Today, 9:14 AM · Source: Salesforce MC + Cerner + Google Ads + Meta</p>
+    </div>
+    <div class="topbar-right">
+      <div class="date-range">
+        <select id="dateRange" onchange="updateData()">
+          <option>Last 30 Days</option>
+          <option>Last 60 Days</option>
+          <option>Last 90 Days</option>
+          <option>Year to Date</option>
+        </select>
+      </div>
+      <button class="btn-export" onclick="alert('Export to PDF initiated!')">↓ Export</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi-card teal">
+        
+        <div class="kpi-label">Appointment Requests</div>
+        <div class="kpi-value" id="appt-val">1,847</div>
+        <div class="kpi-meta">
+          <span class="badge-up">▲ 12.4%</span>
+          <span class="kpi-compare">vs prior period</span>
+        </div>
+      </div>
+      <div class="kpi-card gold">
+        
+        <div class="kpi-label">Est. Marketing ROI</div>
+        <div class="kpi-value" id="roi-val">4.2×</div>
+        <div class="kpi-meta">
+          <span class="badge-up">▲ 0.6×</span>
+          <span class="kpi-compare">vs prior period</span>
+        </div>
+      </div>
+      <div class="kpi-card green">
+        
+        <div class="kpi-label">Email Engagement Rate</div>
+        <div class="kpi-value" id="email-val">31.8%</div>
+        <div class="kpi-meta">
+          <span class="badge-up">▲ 3.1%</span>
+          <span class="kpi-compare">vs prior period</span>
+        </div>
+      </div>
+      <div class="kpi-card navy">
+        
+        <div class="kpi-label">Cost Per Lead</div>
+        <div class="kpi-value" id="cpl-val">$38</div>
+        <div class="kpi-meta">
+          <span class="badge-down">▼ $6</span>
+          <span class="kpi-compare">lower is better</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 1: Line Chart + Funnel -->
+    <div class="chart-row two-col">
+
+      <!-- Campaign Trend -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Appointment Requests by Channel</div>
+            <div class="chart-subtitle">Weekly trend — all active campaigns</div>
+          </div>
+          <div class="chart-legend">
+            <span><span class="legend-dot" style="background:#0E7C7B"></span>Email</span>
+            <span><span class="legend-dot" style="background:#E8A838"></span>Paid Search</span>
+            <span><span class="legend-dot" style="background:#2D9E5F"></span>Social</span>
+            <span><span class="legend-dot" style="background:#8B5CF6"></span>Organic</span>
+          </div>
+        </div>
+        <svg viewBox="0 0 560 180" id="linechart">
+          <!-- Grid lines -->
+          <line x1="0" y1="20" x2="560" y2="20" stroke="#EEF1F5" stroke-width="1"/>
+          <line x1="0" y1="60" x2="560" y2="60" stroke="#EEF1F5" stroke-width="1"/>
+          <line x1="0" y1="100" x2="560" y2="100" stroke="#EEF1F5" stroke-width="1"/>
+          <line x1="0" y1="140" x2="560" y2="140" stroke="#EEF1F5" stroke-width="1"/>
+
+          <!-- Y labels -->
+          <text x="0" y="24" fill="#6B7E8E" font-size="10" font-family="DM Sans">600</text>
+          <text x="0" y="64" fill="#6B7E8E" font-size="10" font-family="DM Sans">450</text>
+          <text x="0" y="104" fill="#6B7E8E" font-size="10" font-family="DM Sans">300</text>
+          <text x="0" y="144" fill="#6B7E8E" font-size="10" font-family="DM Sans">150</text>
+
+          <!-- X labels -->
+          <text x="80" y="168" fill="#6B7E8E" font-size="10" font-family="DM Sans" text-anchor="middle">Wk 1</text>
+          <text x="160" y="168" fill="#6B7E8E" font-size="10" font-family="DM Sans" text-anchor="middle">Wk 2</text>
+          <text x="240" y="168" fill="#6B7E8E" font-size="10" font-family="DM Sans" text-anchor="middle">Wk 3</text>
+          <text x="320" y="168" fill="#6B7E8E" font-size="10" font-family="DM Sans" text-anchor="middle">Wk 4</text>
+          <text x="400" y="168" fill="#6B7E8E" font-size="10" font-family="DM Sans" text-anchor="middle">Wk 5</text>
+          <text x="480" y="168" fill="#6B7E8E" font-size="10" font-family="DM Sans" text-anchor="middle">Wk 6</text>
+
+          <!-- Email line -->
+          <polyline points="80,90 160,70 240,55 320,45 400,38 480,28"
+            fill="none" stroke="#0E7C7B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="480" cy="28" r="4" fill="#0E7C7B"/>
+
+          <!-- Paid Search line -->
+          <polyline points="80,110 160,100 240,88 320,80 400,72 480,65"
+            fill="none" stroke="#E8A838" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+            stroke-dasharray="0"/>
+          <circle cx="480" cy="65" r="4" fill="#E8A838"/>
+
+          <!-- Social line -->
+          <polyline points="80,130 160,125 240,120 320,115 400,108 480,100"
+            fill="none" stroke="#2D9E5F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="480" cy="100" r="4" fill="#2D9E5F"/>
+
+          <!-- Organic line -->
+          <polyline points="80,145 160,140 240,138 320,135 400,132 480,128"
+            fill="none" stroke="#8B5CF6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="480" cy="128" r="4" fill="#8B5CF6"/>
+        </svg>
+      </div>
+
+      <!-- Patient Journey Funnel -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Patient Journey Funnel</div>
+            <div class="chart-subtitle">Impression → Appointment booked</div>
+          </div>
+        </div>
+        <div class="funnel-wrap">
+          <div class="funnel-row">
+            <div class="funnel-label">Impressions</div>
+            <div class="funnel-bar-wrap">
+              <div class="funnel-bar" style="width:100%;background:#0E7C7B">284,500</div>
+            </div>
+            <div class="funnel-pct">100%</div>
+          </div>
+          <div class="funnel-row">
+            <div class="funnel-label">Clicks / Opens</div>
+            <div class="funnel-bar-wrap">
+              <div class="funnel-bar" style="width:72%;background:#13A89E">48,320</div>
+            </div>
+            <div class="funnel-pct">17.0%</div>
+          </div>
+          <div class="funnel-row">
+            <div class="funnel-label">Site Visits</div>
+            <div class="funnel-bar-wrap">
+              <div class="funnel-bar" style="width:48%;background:#E8A838">22,100</div>
+            </div>
+            <div class="funnel-pct">7.8%</div>
+          </div>
+          <div class="funnel-row">
+            <div class="funnel-label">Form Submits</div>
+            <div class="funnel-bar-wrap">
+              <div class="funnel-bar" style="width:24%;background:#F0A830">5,840</div>
+            </div>
+            <div class="funnel-pct">2.1%</div>
+          </div>
+          <div class="funnel-row">
+            <div class="funnel-label">Appointments</div>
+            <div class="funnel-bar-wrap">
+              <div class="funnel-bar" style="width:10%;background:#2D9E5F">1,847</div>
+            </div>
+            <div class="funnel-pct">0.65%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 2: Channel Breakdown + Service Lines -->
+    <div class="chart-row two-col">
+
+      <!-- Channel Breakdown Table -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Channel Performance Breakdown</div>
+            <div class="chart-subtitle">All active channels · current period</div>
+          </div>
+          <div class="tab-bar">
+            <div class="tab active">Volume</div>
+            <div class="tab">Cost</div>
+            <div class="tab">ROI</div>
+          </div>
+        </div>
+        <table class="channel-table">
+          <thead>
+            <tr>
+              <th>Channel</th>
+              <th>Appt Requests</th>
+              <th>Share</th>
+              <th>CPL</th>
+              <th>vs Prior</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="channel-dot" style="background:#0E7C7B"></span>Email (SFMC)</td>
+              <td><strong>712</strong></td>
+              <td>
+                <div class="mini-bar-wrap"><div class="mini-bar" style="width:100%;background:#0E7C7B"></div></div>
+              </td>
+              <td>$18</td>
+              <td class="trend-up">▲ 18%</td>
+            </tr>
+            <tr>
+              <td><span class="channel-dot" style="background:#E8A838"></span>Paid Search</td>
+              <td><strong>548</strong></td>
+              <td>
+                <div class="mini-bar-wrap"><div class="mini-bar" style="width:77%;background:#E8A838"></div></div>
+              </td>
+              <td>$54</td>
+              <td class="trend-up">▲ 9%</td>
+            </tr>
+            <tr>
+              <td><span class="channel-dot" style="background:#2D9E5F"></span>Social (Meta)</td>
+              <td><strong>334</strong></td>
+              <td>
+                <div class="mini-bar-wrap"><div class="mini-bar" style="width:47%;background:#2D9E5F"></div></div>
+              </td>
+              <td>$42</td>
+              <td class="trend-down">▼ 4%</td>
+            </tr>
+            <tr>
+              <td><span class="channel-dot" style="background:#8B5CF6"></span>Organic / SEO</td>
+              <td><strong>218</strong></td>
+              <td>
+                <div class="mini-bar-wrap"><div class="mini-bar" style="width:31%;background:#8B5CF6"></div></div>
+              </td>
+              <td>$8</td>
+              <td class="trend-up">▲ 22%</td>
+            </tr>
+            <tr>
+              <td><span class="channel-dot" style="background:#94A3B8"></span>Direct / Other</td>
+              <td><strong>35</strong></td>
+              <td>
+                <div class="mini-bar-wrap"><div class="mini-bar" style="width:5%;background:#94A3B8"></div></div>
+              </td>
+              <td>—</td>
+              <td class="trend-flat">— 0%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Service Line Performance -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Service Line Requests</div>
+            <div class="chart-subtitle">Appointment requests by specialty</div>
+          </div>
+        </div>
+        <div class="service-grid">
+          <div class="service-item">
+            <div class="service-icon" style="background:#E6F4F4"></div>
+            <div>
+              <div class="service-name">Cardiology</div>
+              <div class="service-val">428</div>
+              <div class="service-chg trend-up">▲ 14%</div>
+            </div>
+          </div>
+          <div class="service-item">
+            <div class="service-icon" style="background:#FFF3E0"></div>
+            <div>
+              <div class="service-name">Neurology</div>
+              <div class="service-val">312</div>
+              <div class="service-chg trend-up">▲ 8%</div>
+            </div>
+          </div>
+          <div class="service-item">
+            <div class="service-icon" style="background:#E8F5E9"></div>
+            <div>
+              <div class="service-name">Orthopedics</div>
+              <div class="service-val">291</div>
+              <div class="service-chg trend-down">▼ 3%</div>
+            </div>
+          </div>
+          <div class="service-item">
+            <div class="service-icon" style="background:#F3E5F5"></div>
+            <div>
+              <div class="service-name">Oncology</div>
+              <div class="service-val">274</div>
+              <div class="service-chg trend-up">▲ 21%</div>
+            </div>
+          </div>
+          <div class="service-item">
+            <div class="service-icon" style="background:#E3F2FD"></div>
+            <div>
+              <div class="service-name">Ophthalmology</div>
+              <div class="service-val">198</div>
+              <div class="service-chg trend-up">▲ 5%</div>
+            </div>
+          </div>
+          <div class="service-item">
+            <div class="service-icon" style="background:#FFF9E6"></div>
+            <div>
+              <div class="service-name">Women's Health</div>
+              <div class="service-val">344</div>
+              <div class="service-chg trend-up">▲ 17%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 3: Consent Status + System Alerts -->
+    <div class="chart-row two-col">
+
+      <!-- Consent Status -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Consent & Data Sync Status</div>
+            <div class="chart-subtitle">Salesforce ↔ Cerner ↔ Paid Platforms</div>
+          </div>
+        </div>
+
+        <div class="consent-row">
+          <div>
+            <div style="font-weight:500">Email Opt-in (SFMC)</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Last sync: 14 min ago</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="consent-bar-wrap"><div class="consent-bar" style="width:92%"></div></div>
+            <div class="consent-pct" style="color:var(--green)">92%</div>
+          </div>
+        </div>
+
+        <div class="consent-row">
+          <div>
+            <div style="font-weight:500">Cerner → Salesforce</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Last sync: 1 hr ago · daily batch</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="consent-bar-wrap"><div class="consent-bar" style="width:100%;background:#2D9E5F"></div></div>
+            <div class="consent-pct" style="color:var(--green)">✓ OK</div>
+          </div>
+        </div>
+
+        <div class="consent-row">
+          <div>
+            <div style="font-weight:500">Google Ads Suppression</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Last sync: 22 min ago</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="consent-bar-wrap"><div class="consent-bar" style="width:100%;background:#2D9E5F"></div></div>
+            <div class="consent-pct" style="color:var(--green)">✓ OK</div>
+          </div>
+        </div>
+
+        <div class="consent-row">
+          <div>
+            <div style="font-weight:500">Meta Ads Suppression</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Delayed — API rate limit</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="consent-bar-wrap"><div class="consent-bar" style="width:60%;background:#E8A838"></div></div>
+            <div class="consent-pct" style="color:var(--gold)">⚠ Lag</div>
+          </div>
+        </div>
+
+        <div class="consent-row">
+          <div>
+            <div style="font-weight:500">LinkedIn Suppression</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Last sync: 2 hrs ago</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="consent-bar-wrap"><div class="consent-bar" style="width:100%;background:#2D9E5F"></div></div>
+            <div class="consent-pct" style="color:var(--green)">✓ OK</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Alerts -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Action Items & Alerts</div>
+            <div class="chart-subtitle">Requires attention this week</div>
+          </div>
+        </div>
+        <table class="alert-table">
+          <tr>
+            <td>
+              <span class="alert-pill pill-warn">Warning</span><br>
+              <span style="font-weight:500">Meta API sync delay</span><br>
+              <span style="font-size:12px;color:var(--muted)">Ticket #4821 open · Data Mgmt notified</span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="alert-pill pill-ok">On Track</span><br>
+              <span style="font-weight:500">Cardiology email campaign</span><br>
+              <span style="font-size:12px;color:var(--muted)">31.8% open rate · above 28% benchmark</span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="alert-pill pill-info">Insight</span><br>
+              <span style="font-weight:500">Oncology requests up 21%</span><br>
+              <span style="font-size:12px;color:var(--muted)">Recommend increasing budget allocation</span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="alert-pill pill-warn">Review</span><br>
+              <span style="font-weight:500">Social (Meta) down 4%</span><br>
+              <span style="font-size:12px;color:var(--muted)">Creative refresh recommended · A/B test queued</span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="alert-pill pill-ok">On Track</span><br>
+              <span style="font-weight:500">Monthly data audit</span><br>
+              <span style="font-size:12px;color:var(--muted)">Scheduled for Feb 28 · IT Security confirmed</span>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+  // Tab switching
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      tab.closest('.tab-bar').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+
+  // Date range toggle simulates data change
+  function updateData() {
+    const range = document.getElementById('dateRange').value;
+    const multipliers = {
+      'Last 30 Days': [1847, '4.2×', '31.8%', '$38'],
+      'Last 60 Days': [3520, '3.9×', '29.4%', '$41'],
+      'Last 90 Days': [5140, '4.0×', '30.1%', '$39'],
+      'Year to Date': [9820, '4.4×', '32.6%', '$36']
+    };
+    const vals = multipliers[range];
+    document.getElementById('appt-val').textContent = vals[0].toLocaleString();
+    document.getElementById('roi-val').textContent = vals[1];
+    document.getElementById('email-val').textContent = vals[2];
+    document.getElementById('cpl-val').textContent = vals[3];
+  }
+
+  // Animate funnel bars on load
+  document.querySelectorAll('.funnel-bar').forEach(bar => {
+    const target = bar.style.width;
+    // disabled
+    setTimeout(() => { bar.style.width = target; }, 300);
+  });
+</script>
+</body>
+</html>
