@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WMC Health — Service Lines</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0D2B45;
+    --teal: #0E7C7B;
+    --teal-light: #13A89E;
+    --gold: #E8A838;
+    --red: #C94040;
+    --green: #2D9E5F;
+    --bg: #F4F6F9;
+    --card: #FFFFFF;
+    --text: #1A2E3B;
+    --muted: #6B7E8E;
+    --border: #DDE3EA;
+    --sidebar-w: 220px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; font-size: 14px; }
+
+  .sidebar { width: var(--sidebar-w); min-width: var(--sidebar-w); background: var(--navy); display: flex; flex-direction: column; position: sticky; top: 0; height: fit-content; min-height: 100vh; z-index: 100; flex-shrink: 0; }
+  .sidebar-logo { padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .sidebar-logo .logo-mark { font-family: 'DM Serif Display', serif; font-size: 22px; color: #fff; line-height: 1; }
+  .sidebar-logo .logo-sub { font-size: 10px; color: var(--teal-light); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 4px; }
+  .sidebar-section { padding: 20px 16px 8px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.35); }
+  .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: rgba(255,255,255,0.6); cursor: pointer; border-radius: 8px; margin: 2px 8px; transition: all 0.2s; font-size: 13px; text-decoration: none; }
+  .sidebar-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+  .sidebar-item.active { background: var(--teal); color: #fff; }
+  .sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 12px; color: rgba(255,255,255,0.4); }
+  .sidebar-footer strong { display: block; color: rgba(255,255,255,0.7); }
+
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .topbar { background: #fff; border-bottom: 1px solid var(--border); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+  .topbar-left h1 { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--navy); }
+  .topbar-left p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .date-range { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 13px; color: var(--muted); }
+  .date-range select { border: none; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text); cursor: pointer; outline: none; }
+  .btn-export { background: var(--teal); color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
+
+  .content { padding: 28px 32px; }
+
+  /* SERVICE LINE FILTER TABS */
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+  .filter-tab { padding: 8px 16px; border-radius: 20px; font-size: 13px; cursor: pointer; border: 1px solid var(--border); background: #fff; color: var(--muted); transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+  .filter-tab:hover { border-color: var(--teal); color: var(--teal); }
+  .filter-tab.active { background: var(--teal); color: #fff; border-color: var(--teal); }
+
+  /* KPI GRID */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; }
+  .kpi-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .kpi-card.teal::after { background: var(--teal); }
+  .kpi-card.gold::after { background: var(--gold); }
+  .kpi-card.green::after { background: var(--green); }
+  .kpi-card.navy::after { background: var(--navy); }
+  .kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 10px; }
+  .kpi-value { font-family: 'DM Serif Display', serif; font-size: 32px; color: var(--navy); line-height: 1; }
+  .kpi-meta { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 12px; }
+  .badge-up { color: var(--green); font-weight: 600; }
+  .badge-down { color: var(--red); font-weight: 600; }
+  .kpi-compare { color: var(--muted); }
+
+  /* CHART ROWS */
+  .chart-row { display: grid; gap: 16px; margin-bottom: 24px; }
+  .chart-row.two-col { grid-template-columns: 1fr 1fr; }
+  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .chart-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  .chart-title { font-weight: 600; font-size: 14px; color: var(--navy); }
+  .chart-subtitle { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .chart-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 11px; color: var(--muted); }
+  .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+
+  svg { width: 100%; overflow: visible; }
+
+  /* SERVICE LINE CARDS */
+  .sl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  .sl-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.2s; }
+  .sl-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); transform: translateY(-2px); }
+  .sl-card.selected { border-color: var(--teal); box-shadow: 0 0 0 2px rgba(14,124,123,0.15); }
+  .sl-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .sl-name { font-weight: 600; font-size: 14px; color: var(--navy); }
+  .sl-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .sl-up { background: #E6F7EE; color: #1A7A42; }
+  .sl-down { background: #FDECEA; color: #9B2020; }
+  .sl-neutral { background: #EEF1F5; color: #6B7E8E; }
+  .sl-appts { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--navy); }
+  .sl-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .sl-bar-wrap { margin-top: 12px; background: #EEF1F5; border-radius: 4px; height: 6px; }
+  .sl-bar { height: 6px; border-radius: 4px; }
+  .sl-stats { display: flex; justify-content: space-between; margin-top: 10px; }
+  .sl-stat { text-align: center; }
+  .sl-stat .val { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .sl-stat .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+
+  /* DETAIL TABLE */
+  .detail-table { width: 100%; border-collapse: collapse; }
+  .detail-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 0 12px 10px; border-bottom: 1px solid var(--border); font-weight: 500; }
+  .detail-table td { padding: 11px 12px; font-size: 13px; border-bottom: 1px solid #F0F3F6; }
+  .detail-table tr:last-child td { border-bottom: none; }
+  .detail-table tr:hover td { background: #F9FAFB; }
+  .trend-up { color: var(--green); font-weight: 600; font-size: 12px; }
+  .trend-down { color: var(--red); font-weight: 600; font-size: 12px; }
+
+  /* CHANNEL MIX */
+  .mix-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .mix-label { font-size: 12px; color: var(--muted); width: 100px; text-align: right; flex-shrink: 0; }
+  .mix-bar-wrap { flex: 1; background: #EEF1F5; border-radius: 4px; height: 22px; overflow: hidden; }
+  .mix-bar { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 600; color: #fff; }
+  .mix-pct { font-size: 12px; color: var(--muted); width: 36px; text-align: right; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">WMCHealth</div>
+    <div class="logo-sub">Marketing Intelligence</div>
+  </div>
+  <div class="sidebar-section">Overview</div>
+  <a href="index.html" class="sidebar-item">Dashboard</a>
+  <a href="campaign-roi.html" class="sidebar-item">Campaign ROI</a>
+  <a href="service-lines.html" class="sidebar-item active">Service Lines</a>
+  <div class="sidebar-section">Channels</div>
+  <a href="#" class="sidebar-item">Email</a>
+  <a href="#" class="sidebar-item">Paid Search</a>
+  <a href="#" class="sidebar-item">Social</a>
+  <a href="#" class="sidebar-item">Organic</a>
+  <div class="sidebar-section">Data</div>
+  <a href="#" class="sidebar-item">Salesforce Sync</a>
+  <a href="#" class="sidebar-item">Consent Mgmt</a>
+  <a href="#" class="sidebar-item">Settings</a>
+  <div class="sidebar-footer">
+    <strong>Jason Chae</strong>
+    Manager, Digital Analytics
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Service Lines</h1>
+      <p>Last refreshed: Today, 9:14 AM · Source: Salesforce MC + Cerner + Google Ads + Meta</p>
+    </div>
+    <div class="topbar-right">
+      <div class="date-range">
+        <select>
+          <option>Last 30 Days</option>
+          <option>Last 60 Days</option>
+          <option>Last 90 Days</option>
+          <option>Year to Date</option>
+        </select>
+      </div>
+      <button class="btn-export">↓ Export</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- FILTER TABS -->
+    <div class="filter-bar">
+      <button class="filter-tab active" onclick="setFilter(this,'All')">All Service Lines</button>
+      <button class="filter-tab" onclick="setFilter(this,'Cardiology')">Cardiology</button>
+      <button class="filter-tab" onclick="setFilter(this,'Oncology')">Oncology</button>
+      <button class="filter-tab" onclick="setFilter(this,'Neurology')">Neurology</button>
+      <button class="filter-tab" onclick="setFilter(this,'Orthopedics')">Orthopedics</button>
+      <button class="filter-tab" onclick="setFilter(this,'Womens')">Women's Health</button>
+      <button class="filter-tab" onclick="setFilter(this,'Ophthalmology')">Ophthalmology</button>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi-card teal">
+        <div class="kpi-label">Total Appt Requests</div>
+        <div class="kpi-value">1,847</div>
+        <div class="kpi-meta"><span class="badge-up">▲ 12.4%</span><span class="kpi-compare">vs prior period</span></div>
+      </div>
+      <div class="kpi-card gold">
+        <div class="kpi-label">Top Performing Line</div>
+        <div class="kpi-value" style="font-size:22px;padding-top:4px">Cardiology</div>
+        <div class="kpi-meta"><span class="badge-up">428 requests · ▲ 14%</span></div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">Fastest Growing</div>
+        <div class="kpi-value" style="font-size:22px;padding-top:4px">Oncology</div>
+        <div class="kpi-meta"><span class="badge-up">▲ 21% vs prior period</span></div>
+      </div>
+      <div class="kpi-card navy">
+        <div class="kpi-label">Needs Attention</div>
+        <div class="kpi-value" style="font-size:22px;padding-top:4px">Orthopedics</div>
+        <div class="kpi-meta"><span class="badge-down">▼ 3% vs prior period</span></div>
+      </div>
+    </div>
+
+    <!-- SERVICE LINE CARDS -->
+    <div class="sl-grid">
+
+      <!-- Cardiology -->
+      <div class="sl-card selected" onclick="selectCard(this)">
+        <div class="sl-card-top">
+          <div class="sl-name">Cardiology</div>
+          <span class="sl-badge sl-up">▲ 14%</span>
+        </div>
+        <div class="sl-appts">428</div>
+        <div class="sl-meta">Appointment Requests</div>
+        <div class="sl-bar-wrap"><div class="sl-bar" style="width:100%;background:#0E7C7B"></div></div>
+        <div class="sl-stats">
+          <div class="sl-stat"><div class="val">$18</div><div class="lbl">CPL</div></div>
+          <div class="sl-stat"><div class="val">36.2%</div><div class="lbl">Email OR</div></div>
+          <div class="sl-stat"><div class="val">4.4×</div><div class="lbl">ROI</div></div>
+        </div>
+      </div>
+
+      <!-- Women's Health -->
+      <div class="sl-card" onclick="selectCard(this)">
+        <div class="sl-card-top">
+          <div class="sl-name">Women's Health</div>
+          <span class="sl-badge sl-up">▲ 17%</span>
+        </div>
+        <div class="sl-appts">344</div>
+        <div class="sl-meta">Appointment Requests</div>
+        <div class="sl-bar-wrap"><div class="sl-bar" style="width:80%;background:#8B5CF6"></div></div>
+        <div class="sl-stats">
+          <div class="sl-stat"><div class="val">$22</div><div class="lbl">CPL</div></div>
+          <div class="sl-stat"><div class="val">37.0%</div><div class="lbl">Email OR</div></div>
+          <div class="sl-stat"><div class="val">4.8×</div><div class="lbl">ROI</div></div>
+        </div>
+      </div>
+
+      <!-- Neurology -->
+      <div class="sl-card" onclick="selectCard(this)">
+        <div class="sl-card-top">
+          <div class="sl-name">Neurology</div>
+          <span class="sl-badge sl-up">▲ 8%</span>
+        </div>
+        <div class="sl-appts">312</div>
+        <div class="sl-meta">Appointment Requests</div>
+        <div class="sl-bar-wrap"><div class="sl-bar" style="width:73%;background:#E8A838"></div></div>
+        <div class="sl-stats">
+          <div class="sl-stat"><div class="val">$26</div><div class="lbl">CPL</div></div>
+          <div class="sl-stat"><div class="val">35.0%</div><div class="lbl">Email OR</div></div>
+          <div class="sl-stat"><div class="val">3.8×</div><div class="lbl">ROI</div></div>
+        </div>
+      </div>
+
+      <!-- Oncology -->
+      <div class="sl-card" onclick="selectCard(this)">
+        <div class="sl-card-top">
+          <div class="sl-name">Oncology</div>
+          <span class="sl-badge sl-up">▲ 21%</span>
+        </div>
+        <div class="sl-appts">274</div>
+        <div class="sl-meta">Appointment Requests</div>
+        <div class="sl-bar-wrap"><div class="sl-bar" style="width:64%;background:#2D9E5F"></div></div>
+        <div class="sl-stats">
+          <div class="sl-stat"><div class="val">$20</div><div class="lbl">CPL</div></div>
+          <div class="sl-stat"><div class="val">39.5%</div><div class="lbl">Email OR</div></div>
+          <div class="sl-stat"><div class="val">4.5×</div><div class="lbl">ROI</div></div>
+        </div>
+      </div>
+
+      <!-- Ophthalmology -->
+      <div class="sl-card" onclick="selectCard(this)">
+        <div class="sl-card-top">
+          <div class="sl-name">Ophthalmology</div>
+          <span class="sl-badge sl-up">▲ 5%</span>
+        </div>
+        <div class="sl-appts">198</div>
+        <div class="sl-meta">Appointment Requests</div>
+        <div class="sl-bar-wrap"><div class="sl-bar" style="width:46%;background:#0D2B45"></div></div>
+        <div class="sl-stats">
+          <div class="sl-stat"><div class="val">$28</div><div class="lbl">CPL</div></div>
+          <div class="sl-stat"><div class="val">32.5%</div><div class="lbl">Email OR</div></div>
+          <div class="sl-stat"><div class="val">3.1×</div><div class="lbl">ROI</div></div>
+        </div>
+      </div>
+
+      <!-- Orthopedics -->
+      <div class="sl-card" onclick="selectCard(this)">
+        <div class="sl-card-top">
+          <div class="sl-name">Orthopedics</div>
+          <span class="sl-badge sl-down">▼ 3%</span>
+        </div>
+        <div class="sl-appts">291</div>
+        <div class="sl-meta">Appointment Requests</div>
+        <div class="sl-bar-wrap"><div class="sl-bar" style="width:68%;background:#C94040"></div></div>
+        <div class="sl-stats">
+          <div class="sl-stat"><div class="val">$30</div><div class="lbl">CPL</div></div>
+          <div class="sl-stat"><div class="val">31.6%</div><div class="lbl">Email OR</div></div>
+          <div class="sl-stat"><div class="val">2.8×</div><div class="lbl">ROI</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DETAIL ROWS -->
+    <div class="chart-row two-col">
+
+      <!-- Weekly Trend by Service Line -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Weekly Appointment Requests by Service Line</div>
+            <div class="chart-subtitle">6-week trend — all lines</div>
+          </div>
+          <div class="chart-legend">
+            <span><span class="legend-dot" style="background:#0E7C7B"></span>Cardiology</span>
+            <span><span class="legend-dot" style="background:#8B5CF6"></span>Women's</span>
+            <span><span class="legend-dot" style="background:#2D9E5F"></span>Oncology</span>
+            <span><span class="legend-dot" style="background:#E8A838"></span>Neuro</span>
+          </div>
+        </div>
+        <svg viewBox="0 0 520 180">
+          <line x1="40" y1="20" x2="520" y2="20" stroke="#EEF1F5" stroke-width="1"/>
+          <line x1="40" y1="60" x2="520" y2="60" stroke="#EEF1F5" stroke-width="1"/>
+          <line x1="40" y1="100" x2="520" y2="100" stroke="#EEF1F5" stroke-width="1"/>
+          <line x1="40" y1="140" x2="520" y2="140" stroke="#EEF1F5" stroke-width="1"/>
+          <text x="4" y="24" fill="#6B7E8E" font-size="10" font-family="DM Sans">90</text>
+          <text x="4" y="64" fill="#6B7E8E" font-size="10" font-family="DM Sans">70</text>
+          <text x="4" y="104" fill="#6B7E8E" font-size="10" font-family="DM Sans">50</text>
+          <text x="4" y="144" fill="#6B7E8E" font-size="10" font-family="DM Sans">30</text>
+          <text x="80" y="165" fill="#6B7E8E" font-size="10" font-family="DM Sans" text-anchor="middle">Wk 1</text>
+          <text x="160" y="165" fill="#6B7E8E" font-size="10" font-family="DM Sans" text-anchor="middle">Wk 2</text>
+          <text x="240" y="165" fill="#6B7E8E" font-size="10" font-family="DM Sans" text-anchor="middle">Wk 3</text>
+          <text x="320" y="165" fill="#6B7E8E" font-size="10" font-family="DM Sans" text-anchor="middle">Wk 4</text>
+          <text x="400" y="165" fill="#6B7E8E" font-size="10" font-family="DM Sans" text-anchor="middle">Wk 5</text>
+          <text x="480" y="165" fill="#6B7E8E" font-size="10" font-family="DM Sans" text-anchor="middle">Wk 6</text>
+          <!-- Cardiology -->
+          <polyline points="80,110 160,100 240,88 320,72 400,58 480,42" fill="none" stroke="#0E7C7B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="480" cy="42" r="4" fill="#0E7C7B"/>
+          <!-- Women's Health -->
+          <polyline points="80,120 160,112 240,100 320,88 400,72 480,58" fill="none" stroke="#8B5CF6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="480" cy="58" r="4" fill="#8B5CF6"/>
+          <!-- Oncology -->
+          <polyline points="80,135 160,122 240,110 320,96 400,78 480,62" fill="none" stroke="#2D9E5F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="480" cy="62" r="4" fill="#2D9E5F"/>
+          <!-- Neurology -->
+          <polyline points="80,125 160,118 240,110 320,102 400,94 480,84" fill="none" stroke="#E8A838" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5,3"/>
+          <circle cx="480" cy="84" r="4" fill="#E8A838"/>
+        </svg>
+      </div>
+
+      <!-- Channel Mix by Service Line -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Channel Mix by Service Line</div>
+            <div class="chart-subtitle">Share of appointment requests per channel</div>
+          </div>
+        </div>
+        <div style="margin-top:4px">
+          <div style="font-size:11px;font-weight:600;color:var(--navy);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em">Cardiology</div>
+          <div class="mix-row"><div class="mix-label">Email</div><div class="mix-bar-wrap"><div class="mix-bar" style="width:44%;background:#0E7C7B">44%</div></div><div class="mix-pct">188</div></div>
+          <div class="mix-row"><div class="mix-label">Paid Search</div><div class="mix-bar-wrap"><div class="mix-bar" style="width:32%;background:#E8A838">32%</div></div><div class="mix-pct">137</div></div>
+          <div class="mix-row"><div class="mix-label">Social</div><div class="mix-bar-wrap"><div class="mix-bar" style="width:15%;background:#2D9E5F">15%</div></div><div class="mix-pct">64</div></div>
+          <div class="mix-row"><div class="mix-label">Organic</div><div class="mix-bar-wrap"><div class="mix-bar" style="width:9%;background:#8B5CF6">9%</div></div><div class="mix-pct">39</div></div>
+
+          <div style="border-top:1px solid var(--border);margin:14px 0"></div>
+          <div style="font-size:11px;font-weight:600;color:var(--navy);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em">Oncology</div>
+          <div class="mix-row"><div class="mix-label">Email</div><div class="mix-bar-wrap"><div class="mix-bar" style="width:48%;background:#0E7C7B">48%</div></div><div class="mix-pct">131</div></div>
+          <div class="mix-row"><div class="mix-label">Paid Search</div><div class="mix-bar-wrap"><div class="mix-bar" style="width:28%;background:#E8A838">28%</div></div><div class="mix-pct">77</div></div>
+          <div class="mix-row"><div class="mix-label">Social</div><div class="mix-bar-wrap"><div class="mix-bar" style="width:14%;background:#2D9E5F">14%</div></div><div class="mix-pct">38</div></div>
+          <div class="mix-row"><div class="mix-label">Organic</div><div class="mix-bar-wrap"><div class="mix-bar" style="width:10%;background:#8B5CF6">10%</div></div><div class="mix-pct">28</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FULL DETAIL TABLE -->
+    <div class="chart-card" style="margin-bottom:24px">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Service Line Full Performance Detail</div>
+          <div class="chart-subtitle">All channels combined — current period</div>
+        </div>
+      </div>
+      <table class="detail-table">
+        <thead>
+          <tr>
+            <th>Service Line</th>
+            <th>Impressions</th>
+            <th>Clicks</th>
+            <th>Form Submits</th>
+            <th>Appt Requests</th>
+            <th>Total Spend</th>
+            <th>CPL</th>
+            <th>Email Open Rate</th>
+            <th>vs Prior</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Cardiology</strong></td>
+            <td>134,000</td>
+            <td>5,710</td>
+            <td>616</td>
+            <td><strong>428</strong></td>
+            <td>$16,200</td>
+            <td>$18</td>
+            <td>36.2%</td>
+            <td class="trend-up">▲ 14%</td>
+          </tr>
+          <tr>
+            <td><strong>Women's Health</strong></td>
+            <td>120,000</td>
+            <td>5,260</td>
+            <td>584</td>
+            <td><strong>344</strong></td>
+            <td>$14,800</td>
+            <td>$22</td>
+            <td>37.0%</td>
+            <td class="trend-up">▲ 17%</td>
+          </tr>
+          <tr>
+            <td><strong>Neurology</strong></td>
+            <td>98,400</td>
+            <td>4,220</td>
+            <td>470</td>
+            <td><strong>312</strong></td>
+            <td>$12,800</td>
+            <td>$26</td>
+            <td>35.0%</td>
+            <td class="trend-up">▲ 8%</td>
+          </tr>
+          <tr>
+            <td><strong>Orthopedics</strong></td>
+            <td>88,200</td>
+            <td>3,740</td>
+            <td>396</td>
+            <td><strong>291</strong></td>
+            <td>$11,400</td>
+            <td>$30</td>
+            <td>31.6%</td>
+            <td class="trend-down">▼ 3%</td>
+          </tr>
+          <tr>
+            <td><strong>Oncology</strong></td>
+            <td>102,000</td>
+            <td>4,540</td>
+            <td>490</td>
+            <td><strong>274</strong></td>
+            <td>$12,200</td>
+            <td>$20</td>
+            <td>39.5%</td>
+            <td class="trend-up">▲ 21%</td>
+          </tr>
+          <tr>
+            <td><strong>Ophthalmology</strong></td>
+            <td>76,600</td>
+            <td>3,130</td>
+            <td>338</td>
+            <td><strong>198</strong></td>
+            <td>$9,800</td>
+            <td>$28</td>
+            <td>32.5%</td>
+            <td class="trend-up">▲ 5%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function setFilter(el, val) {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+  function selectCard(el) {
+    document.querySelectorAll('.sl-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+</script>
+
+</body>
+</html>

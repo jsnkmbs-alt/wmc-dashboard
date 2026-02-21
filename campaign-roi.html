@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WMC Health — Campaign ROI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0D2B45;
+    --teal: #0E7C7B;
+    --teal-light: #13A89E;
+    --gold: #E8A838;
+    --red: #C94040;
+    --green: #2D9E5F;
+    --bg: #F4F6F9;
+    --card: #FFFFFF;
+    --text: #1A2E3B;
+    --muted: #6B7E8E;
+    --border: #DDE3EA;
+    --sidebar-w: 220px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; font-size: 14px; }
+
+  /* SIDEBAR */
+  .sidebar { width: var(--sidebar-w); min-width: var(--sidebar-w); background: var(--navy); display: flex; flex-direction: column; position: sticky; top: 0; height: fit-content; min-height: 100vh; z-index: 100; flex-shrink: 0; }
+  .sidebar-logo { padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .sidebar-logo .logo-mark { font-family: 'DM Serif Display', serif; font-size: 22px; color: #fff; line-height: 1; }
+  .sidebar-logo .logo-sub { font-size: 10px; color: var(--teal-light); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 4px; }
+  .sidebar-section { padding: 20px 16px 8px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.35); }
+  .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: rgba(255,255,255,0.6); cursor: pointer; border-radius: 8px; margin: 2px 8px; transition: all 0.2s; font-size: 13px; text-decoration: none; }
+  .sidebar-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+  .sidebar-item.active { background: var(--teal); color: #fff; }
+  .sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 12px; color: rgba(255,255,255,0.4); }
+  .sidebar-footer strong { display: block; color: rgba(255,255,255,0.7); }
+
+  /* MAIN */
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+  /* TOPBAR */
+  .topbar { background: #fff; border-bottom: 1px solid var(--border); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+  .topbar-left h1 { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--navy); }
+  .topbar-left p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .date-range { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 13px; color: var(--muted); }
+  .date-range select { border: none; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text); cursor: pointer; outline: none; }
+  .btn-export { background: var(--teal); color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
+
+  /* CONTENT */
+  .content { padding: 28px 32px; }
+
+  /* KPI CARDS */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; }
+  .kpi-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .kpi-card.teal::after { background: var(--teal); }
+  .kpi-card.gold::after { background: var(--gold); }
+  .kpi-card.green::after { background: var(--green); }
+  .kpi-card.navy::after { background: var(--navy); }
+  .kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 10px; }
+  .kpi-value { font-family: 'DM Serif Display', serif; font-size: 32px; color: var(--navy); line-height: 1; }
+  .kpi-meta { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 12px; }
+  .badge-up { color: var(--green); font-weight: 600; }
+  .badge-down { color: var(--red); font-weight: 600; }
+  .kpi-compare { color: var(--muted); }
+
+  /* CHART ROWS */
+  .chart-row { display: grid; gap: 16px; margin-bottom: 24px; }
+  .chart-row.two-col { grid-template-columns: 1fr 1fr; }
+  .chart-row.three-col { grid-template-columns: 1fr 1fr 1fr; }
+  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .chart-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  .chart-title { font-weight: 600; font-size: 14px; color: var(--navy); }
+  .chart-subtitle { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .chart-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 11px; color: var(--muted); }
+  .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+
+  svg { width: 100%; overflow: visible; }
+
+  /* ROI TABLE */
+  .roi-table { width: 100%; border-collapse: collapse; }
+  .roi-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 0 12px 10px; border-bottom: 1px solid var(--border); font-weight: 500; }
+  .roi-table td { padding: 12px; font-size: 13px; border-bottom: 1px solid #F0F3F6; vertical-align: middle; }
+  .roi-table tr:last-child td { border-bottom: none; }
+  .roi-table tr:hover td { background: #F9FAFB; }
+
+  .roi-pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .roi-high { background: #E6F7EE; color: #1A7A42; }
+  .roi-med { background: #FFF8EC; color: #9A6700; }
+  .roi-low { background: #FDECEA; color: #9B2020; }
+
+  .trend-up { color: var(--green); font-size: 12px; font-weight: 600; }
+  .trend-down { color: var(--red); font-size: 12px; font-weight: 600; }
+
+  /* BAR CHART */
+  .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .bar-label { font-size: 12px; color: var(--muted); width: 110px; text-align: right; flex-shrink: 0; }
+  .bar-wrap { flex: 1; background: #EEF1F5; border-radius: 4px; height: 28px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 10px; font-size: 12px; font-weight: 600; color: #fff; }
+  .bar-val { font-size: 12px; color: var(--text); font-weight: 600; width: 60px; text-align: right; }
+
+  /* SPEND vs RETURN */
+  .compare-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .compare-row:last-child { border-bottom: none; }
+  .compare-label { font-size: 13px; font-weight: 500; color: var(--navy); }
+  .compare-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .compare-vals { display: flex; gap: 32px; }
+  .compare-val { text-align: right; }
+  .compare-val .num { font-size: 16px; font-weight: 600; color: var(--navy); }
+  .compare-val .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">WMCHealth</div>
+    <div class="logo-sub">Marketing Intelligence</div>
+  </div>
+  <div class="sidebar-section">Overview</div>
+  <a href="index.html" class="sidebar-item">Dashboard</a>
+  <a href="campaign-roi.html" class="sidebar-item active">Campaign ROI</a>
+  <a href="service-lines.html" class="sidebar-item">Service Lines</a>
+  <div class="sidebar-section">Channels</div>
+  <a href="#" class="sidebar-item">Email</a>
+  <a href="#" class="sidebar-item">Paid Search</a>
+  <a href="#" class="sidebar-item">Social</a>
+  <a href="#" class="sidebar-item">Organic</a>
+  <div class="sidebar-section">Data</div>
+  <a href="#" class="sidebar-item">Salesforce Sync</a>
+  <a href="#" class="sidebar-item">Consent Mgmt</a>
+  <a href="#" class="sidebar-item">Settings</a>
+  <div class="sidebar-footer">
+    <strong>Jason Chae</strong>
+    Manager, Digital Analytics
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Campaign ROI</h1>
+      <p>Last refreshed: Today, 9:14 AM · Source: Salesforce MC + Cerner + Google Ads + Meta</p>
+    </div>
+    <div class="topbar-right">
+      <div class="date-range">
+        <select>
+          <option>Last 30 Days</option>
+          <option>Last 60 Days</option>
+          <option>Last 90 Days</option>
+          <option>Year to Date</option>
+        </select>
+      </div>
+      <button class="btn-export">↓ Export</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi-card teal">
+        <div class="kpi-label">Total Marketing Spend</div>
+        <div class="kpi-value">$87,420</div>
+        <div class="kpi-meta"><span class="badge-up">▲ 8.2%</span><span class="kpi-compare">vs prior period</span></div>
+      </div>
+      <div class="kpi-card gold">
+        <div class="kpi-label">Est. Patient Revenue Generated</div>
+        <div class="kpi-value">$367K</div>
+        <div class="kpi-meta"><span class="badge-up">▲ 14.6%</span><span class="kpi-compare">vs prior period</span></div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">Overall Marketing ROI</div>
+        <div class="kpi-value">4.2×</div>
+        <div class="kpi-meta"><span class="badge-up">▲ 0.6×</span><span class="kpi-compare">vs prior period</span></div>
+      </div>
+      <div class="kpi-card navy">
+        <div class="kpi-label">Blended Cost Per Lead</div>
+        <div class="kpi-value">$38</div>
+        <div class="kpi-meta"><span class="badge-down">▼ $6</span><span class="kpi-compare">lower is better</span></div>
+      </div>
+    </div>
+
+    <!-- ROI TREND + SPEND MIX -->
+    <div class="chart-row two-col">
+
+      <!-- ROI Trend Over Time -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">ROI Trend Over Time</div>
+            <div class="chart-subtitle">Estimated return per $1 spent — weekly</div>
+          </div>
+          <div class="chart-legend">
+            <span><span class="legend-dot" style="background:#0E7C7B"></span>ROI Multiplier</span>
+            <span><span class="legend-dot" style="background:#E8A838"></span>Spend</span>
+          </div>
+        </div>
+        <svg viewBox="0 0 520 180">
+          <!-- Grid -->
+          <line x1="40" y1="20" x2="520" y2="20" stroke="#EEF1F5" stroke-width="1"/>
+          <line x1="40" y1="60" x2="520" y2="60" stroke="#EEF1F5" stroke-width="1"/>
+          <line x1="40" y1="100" x2="520" y2="100" stroke="#EEF1F5" stroke-width="1"/>
+          <line x1="40" y1="140" x2="520" y2="140" stroke="#EEF1F5" stroke-width="1"/>
+          <!-- Y labels -->
+          <text x="0" y="24" fill="#6B7E8E" font-size="10" font-family="DM Sans">5×</text>
+          <text x="0" y="64" fill="#6B7E8E" font-size="10" font-family="DM Sans">4×</text>
+          <text x="0" y="104" fill="#6B7E8E" font-size="10" font-family="DM Sans">3×</text>
+          <text x="0" y="144" fill="#6B7E8E" font-size="10" font-family="DM Sans">2×</text>
+          <!-- X labels -->
+          <text x="80" y="165" fill="#6B7E8E" font-size="10" font-family="DM Sans" text-anchor="middle">Wk 1</text>
+          <text x="160" y="165" fill="#6B7E8E" font-size="10" font-family="DM Sans" text-anchor="middle">Wk 2</text>
+          <text x="240" y="165" fill="#6B7E8E" font-size="10" font-family="DM Sans" text-anchor="middle">Wk 3</text>
+          <text x="320" y="165" fill="#6B7E8E" font-size="10" font-family="DM Sans" text-anchor="middle">Wk 4</text>
+          <text x="400" y="165" fill="#6B7E8E" font-size="10" font-family="DM Sans" text-anchor="middle">Wk 5</text>
+          <text x="480" y="165" fill="#6B7E8E" font-size="10" font-family="DM Sans" text-anchor="middle">Wk 6</text>
+          <!-- ROI line (3.6 → 4.2×) -->
+          <polyline points="80,116 160,108 240,96 320,82 400,68 480,52"
+            fill="none" stroke="#0E7C7B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="480" cy="52" r="4" fill="#0E7C7B"/>
+          <!-- Spend area (gentle rise) -->
+          <polyline points="80,130 160,126 240,122 320,118 400,112 480,108"
+            fill="none" stroke="#E8A838" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5,3"/>
+          <circle cx="480" cy="108" r="4" fill="#E8A838"/>
+        </svg>
+      </div>
+
+      <!-- Spend by Channel donut-style bars -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Spend Distribution by Channel</div>
+            <div class="chart-subtitle">Total: $87,420 — current period</div>
+          </div>
+        </div>
+        <div style="margin-top:8px">
+          <div class="bar-row">
+            <div class="bar-label">Email (SFMC)</div>
+            <div class="bar-wrap"><div class="bar-fill" style="width:26%;background:#0E7C7B">$22,716</div></div>
+            <div class="bar-val">26%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Paid Search</div>
+            <div class="bar-wrap"><div class="bar-fill" style="width:38%;background:#E8A838">$33,156</div></div>
+            <div class="bar-val">38%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Social (Meta)</div>
+            <div class="bar-wrap"><div class="bar-fill" style="width:24%;background:#2D9E5F">$20,916</div></div>
+            <div class="bar-val">24%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Organic / SEO</div>
+            <div class="bar-wrap"><div class="bar-fill" style="width:12%;background:#8B5CF6">$10,632</div></div>
+            <div class="bar-val">12%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHANNEL ROI TABLE -->
+    <div class="chart-row" style="grid-template-columns: 1fr;">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">ROI by Channel — Detail</div>
+            <div class="chart-subtitle">Spend, appointments, estimated revenue, and return</div>
+          </div>
+        </div>
+        <table class="roi-table">
+          <thead>
+            <tr>
+              <th>Channel</th>
+              <th>Total Spend</th>
+              <th>Appt Requests</th>
+              <th>CPL</th>
+              <th>Est. Revenue</th>
+              <th>ROI</th>
+              <th>vs Prior</th>
+              <th>Rating</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#0E7C7B;margin-right:8px"></span>Email (SFMC)</td>
+              <td>$22,716</td>
+              <td><strong>712</strong></td>
+              <td>$18</td>
+              <td>$95,408</td>
+              <td><strong>4.2×</strong></td>
+              <td class="trend-up">▲ 18%</td>
+              <td><span class="roi-pill roi-high">High</span></td>
+            </tr>
+            <tr>
+              <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#E8A838;margin-right:8px"></span>Paid Search</td>
+              <td>$33,156</td>
+              <td><strong>548</strong></td>
+              <td>$54</td>
+              <td>$73,432</td>
+              <td><strong>2.2×</strong></td>
+              <td class="trend-up">▲ 9%</td>
+              <td><span class="roi-pill roi-med">Medium</span></td>
+            </tr>
+            <tr>
+              <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#2D9E5F;margin-right:8px"></span>Social (Meta)</td>
+              <td>$20,916</td>
+              <td><strong>334</strong></td>
+              <td>$42</td>
+              <td>$44,756</td>
+              <td><strong>2.1×</strong></td>
+              <td class="trend-down">▼ 4%</td>
+              <td><span class="roi-pill roi-med">Medium</span></td>
+            </tr>
+            <tr>
+              <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#8B5CF6;margin-right:8px"></span>Organic / SEO</td>
+              <td>$10,632</td>
+              <td><strong>218</strong></td>
+              <td>$8</td>
+              <td>$29,212</td>
+              <td><strong>2.7×</strong></td>
+              <td class="trend-up">▲ 22%</td>
+              <td><span class="roi-pill roi-high">High</span></td>
+            </tr>
+            <tr>
+              <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#94A3B8;margin-right:8px"></span>Direct / Other</td>
+              <td>—</td>
+              <td><strong>35</strong></td>
+              <td>—</td>
+              <td>$4,690</td>
+              <td>—</td>
+              <td class="trend-up">— 0%</td>
+              <td><span class="roi-pill roi-med">N/A</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SPEND vs RETURN + MONTHLY TREND -->
+    <div class="chart-row two-col">
+      <!-- Spend vs Return by Campaign -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Spend vs. Est. Revenue by Campaign</div>
+            <div class="chart-subtitle">Top 6 active campaigns</div>
+          </div>
+        </div>
+        <div class="compare-row">
+          <div>
+            <div class="compare-label">Heart Health Awareness</div>
+            <div class="compare-sub">Email (SFMC) · Cardiology</div>
+          </div>
+          <div class="compare-vals">
+            <div class="compare-val"><div class="lbl">Spend</div><div class="num">$8,748</div></div>
+            <div class="compare-val"><div class="lbl">Revenue</div><div class="num" style="color:var(--green)">$38,200</div></div>
+            <div class="compare-val"><div class="lbl">ROI</div><div class="num">4.4×</div></div>
+          </div>
+        </div>
+        <div class="compare-row">
+          <div>
+            <div class="compare-label">Cancer Screening Drive</div>
+            <div class="compare-sub">Email (SFMC) · Oncology</div>
+          </div>
+          <div class="compare-vals">
+            <div class="compare-val"><div class="lbl">Spend</div><div class="num">$7,560</div></div>
+            <div class="compare-val"><div class="lbl">Revenue</div><div class="num" style="color:var(--green)">$34,100</div></div>
+            <div class="compare-val"><div class="lbl">ROI</div><div class="num">4.5×</div></div>
+          </div>
+        </div>
+        <div class="compare-row">
+          <div>
+            <div class="compare-label">Cardiology PPC</div>
+            <div class="compare-sub">Paid Search · Cardiology</div>
+          </div>
+          <div class="compare-vals">
+            <div class="compare-val"><div class="lbl">Spend</div><div class="num">$15,570</div></div>
+            <div class="compare-val"><div class="lbl">Revenue</div><div class="num" style="color:var(--green)">$28,400</div></div>
+            <div class="compare-val"><div class="lbl">ROI</div><div class="num">1.8×</div></div>
+          </div>
+        </div>
+        <div class="compare-row">
+          <div>
+            <div class="compare-label">Women's Wellness</div>
+            <div class="compare-sub">Email (SFMC) · Women's Health</div>
+          </div>
+          <div class="compare-vals">
+            <div class="compare-val"><div class="lbl">Spend</div><div class="num">$7,884</div></div>
+            <div class="compare-val"><div class="lbl">Revenue</div><div class="num" style="color:var(--green)">$37,600</div></div>
+            <div class="compare-val"><div class="lbl">ROI</div><div class="num">4.8×</div></div>
+          </div>
+        </div>
+        <div class="compare-row">
+          <div>
+            <div class="compare-label">Heart Month Social</div>
+            <div class="compare-sub">Social (Meta) · Cardiology</div>
+          </div>
+          <div class="compare-vals">
+            <div class="compare-val"><div class="lbl">Spend</div><div class="num">$9,324</div></div>
+            <div class="compare-val"><div class="lbl">Revenue</div><div class="num" style="color:var(--gold)">$14,200</div></div>
+            <div class="compare-val"><div class="lbl">ROI</div><div class="num">1.5×</div></div>
+          </div>
+        </div>
+        <div class="compare-row">
+          <div>
+            <div class="compare-label">Oncology Awareness Social</div>
+            <div class="compare-sub">Social (Meta) · Oncology</div>
+          </div>
+          <div class="compare-vals">
+            <div class="compare-val"><div class="lbl">Spend</div><div class="num">$9,072</div></div>
+            <div class="compare-val"><div class="lbl">Revenue</div><div class="num" style="color:var(--gold)">$18,400</div></div>
+            <div class="compare-val"><div class="lbl">ROI</div><div class="num">2.0×</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- A/B Test Results -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">A/B Test Results</div>
+            <div class="chart-subtitle">Active and recently completed tests</div>
+          </div>
+        </div>
+        <div style="margin-top:4px">
+          <!-- Test 1 -->
+          <div style="background:#F9FAFB;border-radius:8px;padding:14px;margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <div style="font-weight:600;font-size:13px;color:var(--navy)">Cardiology Email Subject Line</div>
+              <span style="background:#E6F7EE;color:#1A7A42;font-size:10px;font-weight:600;padding:2px 8px;border-radius:12px;text-transform:uppercase">Winner Found</span>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Variant B: "Your Heart Health Matters" vs Variant A: "Schedule Your Cardiac Checkup"</div>
+            <div style="display:flex;gap:12px">
+              <div style="flex:1;background:#fff;border-radius:6px;padding:10px;border:1px solid var(--border)">
+                <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Variant A</div>
+                <div style="font-size:18px;font-weight:600;color:var(--navy);margin-top:4px">28.4%</div>
+                <div style="font-size:11px;color:var(--muted)">Open Rate</div>
+              </div>
+              <div style="flex:1;background:#fff;border-radius:6px;padding:10px;border:2px solid var(--teal)">
+                <div style="font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:0.08em;font-weight:600">Variant B ✓</div>
+                <div style="font-size:18px;font-weight:600;color:var(--teal);margin-top:4px">37.2%</div>
+                <div style="font-size:11px;color:var(--muted)">Open Rate</div>
+              </div>
+            </div>
+          </div>
+          <!-- Test 2 -->
+          <div style="background:#F9FAFB;border-radius:8px;padding:14px;margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <div style="font-weight:600;font-size:13px;color:var(--navy)">Oncology Landing Page CTA</div>
+              <span style="background:#E6F0FF;color:#1A4FA0;font-size:10px;font-weight:600;padding:2px 8px;border-radius:12px;text-transform:uppercase">In Progress</span>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px">CTA Button: "Book a Screening" vs "Learn More About Screening"</div>
+            <div style="display:flex;gap:12px">
+              <div style="flex:1;background:#fff;border-radius:6px;padding:10px;border:1px solid var(--border)">
+                <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Variant A</div>
+                <div style="font-size:18px;font-weight:600;color:var(--navy);margin-top:4px">3.2%</div>
+                <div style="font-size:11px;color:var(--muted)">Conv. Rate</div>
+              </div>
+              <div style="flex:1;background:#fff;border-radius:6px;padding:10px;border:1px solid var(--border)">
+                <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Variant B</div>
+                <div style="font-size:18px;font-weight:600;color:var(--navy);margin-top:4px">4.1%</div>
+                <div style="font-size:11px;color:var(--muted)">Conv. Rate</div>
+              </div>
+            </div>
+          </div>
+          <!-- Test 3 -->
+          <div style="background:#F9FAFB;border-radius:8px;padding:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <div style="font-weight:600;font-size:13px;color:var(--navy)">Women's Health Social Creative</div>
+              <span style="background:#FFF3D6;color:#9A6700;font-size:10px;font-weight:600;padding:2px 8px;border-radius:12px;text-transform:uppercase">Queued</span>
+            </div>
+            <div style="font-size:11px;color:var(--muted)">Image vs Video creative — launching next week</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
