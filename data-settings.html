@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WMC Health — Settings</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#0D2B45;--teal:#0E7C7B;--teal-light:#13A89E;--gold:#E8A838;--red:#C94040;--green:#2D9E5F;--bg:#F4F6F9;--card:#FFFFFF;--text:#1A2E3B;--muted:#6B7E8E;--border:#DDE3EA;--sidebar-w:220px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:14px;}
+  .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--navy);display:flex;flex-direction:column;position:sticky;top:0;height:fit-content;min-height:100vh;z-index:100;flex-shrink:0;}
+  .sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid rgba(255,255,255,0.08);}
+  .sidebar-logo .logo-mark{font-family:'DM Serif Display',serif;font-size:22px;color:#fff;line-height:1;}
+  .sidebar-logo .logo-sub{font-size:10px;color:var(--teal-light);letter-spacing:0.12em;text-transform:uppercase;margin-top:4px;}
+  .sidebar-section{padding:20px 16px 8px;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:rgba(255,255,255,0.35);}
+  .sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 16px;color:rgba(255,255,255,0.6);cursor:pointer;border-radius:8px;margin:2px 8px;font-size:13px;text-decoration:none;}
+  .sidebar-item:hover{background:rgba(255,255,255,0.06);color:#fff;}
+  .sidebar-item.active{background:var(--teal);color:#fff;}
+  .sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid rgba(255,255,255,0.08);font-size:12px;color:rgba(255,255,255,0.4);}
+  .sidebar-footer strong{display:block;color:rgba(255,255,255,0.7);}
+  .main{flex:1;display:flex;flex-direction:column;min-width:0;}
+  .topbar{background:#fff;border-bottom:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+  .topbar-left h1{font-family:'DM Serif Display',serif;font-size:20px;color:var(--navy);}
+  .topbar-left p{font-size:12px;color:var(--muted);margin-top:2px;}
+  .topbar-right{display:flex;gap:10px;}
+  .btn-save{background:var(--teal);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;}
+  .btn-secondary{background:#fff;color:var(--navy);border:1px solid var(--border);border-radius:8px;padding:9px 18px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;}
+  .content{padding:28px 32px;max-width:900px;}
+  /* Settings layout */
+  .settings-section{margin-bottom:32px;}
+  .section-heading{font-family:'DM Serif Display',serif;font-size:17px;color:var(--navy);margin-bottom:4px;}
+  .section-sub{font-size:12px;color:var(--muted);margin-bottom:16px;}
+  .setting-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:4px;}
+  .setting-row{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);gap:24px;}
+  .setting-row:last-child{border-bottom:none;}
+  .setting-info{flex:1;}
+  .setting-label{font-weight:500;font-size:13px;color:var(--navy);}
+  .setting-desc{font-size:12px;color:var(--muted);margin-top:3px;}
+  .setting-control{flex-shrink:0;}
+  /* Toggle switch */
+  .toggle{position:relative;width:40px;height:22px;cursor:pointer;}
+  .toggle input{opacity:0;width:0;height:0;position:absolute;}
+  .toggle-track{position:absolute;inset:0;background:#D1D5DB;border-radius:11px;transition:background 0.2s;}
+  .toggle input:checked + .toggle-track{background:var(--teal);}
+  .toggle-thumb{position:absolute;top:3px;left:3px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);}
+  .toggle input:checked ~ .toggle-thumb{transform:translateX(18px);}
+  /* Select */
+  .setting-select{border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:#fff;cursor:pointer;outline:none;min-width:160px;}
+  /* Tag inputs */
+  .tag-wrap{display:flex;flex-wrap:wrap;gap:6px;}
+  .tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:#E6F4F4;border-radius:20px;font-size:12px;color:var(--teal);font-weight:500;}
+  /* Naming convention reference table */
+  .convention-table{width:100%;border-collapse:collapse;}
+  .convention-table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:0 14px 10px;border-bottom:1px solid var(--border);font-weight:500;}
+  .convention-table td{padding:11px 14px;font-size:13px;border-bottom:1px solid #F0F3F6;vertical-align:middle;}
+  .convention-table tr:last-child td{border-bottom:none;}
+  .convention-table tr:hover td{background:#F9FAFB;}
+  .code{font-family:monospace;font-size:12px;background:#F0F3F6;padding:2px 7px;border-radius:4px;color:var(--navy);}
+  .user-row{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);}
+  .user-row:last-child{border-bottom:none;}
+  .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;flex-shrink:0;}
+  .user-info{flex:1;margin-left:12px;}
+  .user-name{font-weight:500;font-size:13px;color:var(--navy);}
+  .user-email{font-size:11px;color:var(--muted);margin-top:2px;}
+  .role-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;text-transform:uppercase;}
+  .role-admin{background:#E6F0FF;color:#1A4FA0;}
+  .role-viewer{background:#EEF1F5;color:#6B7E8E;}
+  .role-editor{background:#E6F4F4;color:#0A5E5D;}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo"><div class="logo-mark">WMCHealth</div><div class="logo-sub">Marketing Intelligence</div></div>
+  <div class="sidebar-section">Overview</div>
+  <a href="index.html" class="sidebar-item">Dashboard</a>
+  <a href="campaign-roi.html" class="sidebar-item">Campaign ROI</a>
+  <a href="service-lines.html" class="sidebar-item">Service Lines</a>
+  <div class="sidebar-section">Channels</div>
+  <a href="channel-email.html" class="sidebar-item">Email</a>
+  <a href="channel-paid-search.html" class="sidebar-item">Paid Search</a>
+  <a href="channel-social.html" class="sidebar-item">Social</a>
+  <a href="channel-organic.html" class="sidebar-item">Organic</a>
+  <div class="sidebar-section">Data</div>
+  <a href="data-salesforce-sync.html" class="sidebar-item">Salesforce Sync</a>
+  <a href="data-consent.html" class="sidebar-item">Consent Mgmt</a>
+  <a href="data-settings.html" class="sidebar-item active">Settings</a>
+  <div class="sidebar-footer"><strong>Jason Chae</strong>Manager, Digital Analytics</div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Settings</h1>
+      <p>Dashboard configuration · data sources · naming convention · user access</p>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-secondary">Discard</button>
+      <button class="btn-save" onclick="alert('Settings saved.')">Save Changes</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DISPLAY PREFERENCES -->
+    <div class="settings-section">
+      <div class="section-heading">Display Preferences</div>
+      <div class="section-sub">Default view and date range settings applied on load</div>
+      <div class="setting-card">
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Default Date Range</div>
+            <div class="setting-desc">Applied when the dashboard loads for the first time each session</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select">
+              <option>Last 30 Days</option>
+              <option>Last 60 Days</option>
+              <option>Last 90 Days</option>
+              <option>Year to Date</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Default Region</div>
+            <div class="setting-desc">Which region filter is pre-selected on load</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select">
+              <option>All Regions</option>
+              <option>North</option>
+              <option>West</option>
+              <option>Westchester</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Show Data Freshness Banner</div>
+            <div class="setting-desc">Display last-refreshed timestamp and source on every page</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <div class="toggle-track"></div>
+              <div class="toggle-thumb"></div>
+            </label>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Alert Banner for Sync Issues</div>
+            <div class="setting-desc">Show warning banner at the top of relevant pages when a data source has a sync lag or error</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <div class="toggle-track"></div>
+              <div class="toggle-thumb"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DATA SOURCES -->
+    <div class="settings-section">
+      <div class="section-heading">Connected Data Sources</div>
+      <div class="section-sub">Active MCI data source connections. Contact your MCI administrator to add or remove sources.</div>
+      <div class="setting-card">
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Salesforce Marketing Cloud (SFMC)</div>
+            <div class="setting-desc">Email send activity · CampaignName · PatientPersonID · SubscriberRegion · incremental</div>
+          </div>
+          <div class="setting-control"><span style="color:var(--green);font-weight:600;font-size:13px">● Connected</span></div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Cerner (Encounters + Appointments)</div>
+            <div class="setting-desc">Patient encounters, service lines, appointments, facility, attribution · daily batch</div>
+          </div>
+          <div class="setting-control"><span style="color:var(--green);font-weight:600;font-size:13px">● Connected</span></div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Google Ads (AdWords + DS)</div>
+            <div class="setting-desc">Paid search: clicks, impressions, spend, conversions, keywords, quality score</div>
+          </div>
+          <div class="setting-control"><span style="color:var(--green);font-weight:600;font-size:13px">● Connected</span></div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Google DFA / DV360</div>
+            <div class="setting-desc">Display and video: impressions, clicks, placements, post-click conversions</div>
+          </div>
+          <div class="setting-control"><span style="color:var(--green);font-weight:600;font-size:13px">● Connected</span></div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Meta (Facebook Ads)</div>
+            <div class="setting-desc">Paid social: impressions, reach, engagement, spend, suppression · near-real-time</div>
+          </div>
+          <div class="setting-control"><span style="color:var(--gold);font-weight:600;font-size:13px">⚠ Sync Lag</span></div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">The Trade Desk (TTD)</div>
+            <div class="setting-desc">Programmatic display: impressions, clicks, video, booked cost, frequency</div>
+          </div>
+          <div class="setting-control"><span style="color:var(--green);font-weight:600;font-size:13px">● Connected</span></div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Google Analytics 4 (GA4)</div>
+            <div class="setting-desc">Web analytics: sessions, users, engagement, page views, conversions, organic channel</div>
+          </div>
+          <div class="setting-control"><span style="color:var(--green);font-weight:600;font-size:13px">● Connected</span></div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">LinkedIn Ads</div>
+            <div class="setting-desc">Suppression only — impressions, spend, and click data not yet connected</div>
+          </div>
+          <div class="setting-control"><span style="color:var(--muted);font-weight:600;font-size:13px">◐ Partial</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAMPAIGN NAMING CONVENTION -->
+    <div class="settings-section">
+      <div class="section-heading">Campaign Naming Convention</div>
+      <div class="section-sub">The structure MCI uses to parse campaign names for region, service line, and attribution. Used by Doret (email) and Unlock (paid media). Full reference in the Campaign Record spreadsheet.</div>
+      <div class="setting-card" style="padding:20px">
+        <div style="background:#E8F4F4;border-radius:8px;padding:14px 18px;font-family:monospace;font-size:13px;color:var(--navy);margin-bottom:16px;letter-spacing:0.02em;">
+          WMC _ FY{Year} _ {ServiceLine} _ {Procedure} _ {Audience} _ {AdditionalIdentifier} _ {Region}
+        </div>
+        <table class="convention-table">
+          <thead><tr><th>Position</th><th>Field</th><th>Example Values</th><th>Required?</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Client</td><td><span class="code">WMC</span></td><td>Yes — fixed</td></tr>
+            <tr><td>2</td><td>Fiscal Year</td><td><span class="code">26</span> <span class="code">27</span></td><td>Yes</td></tr>
+            <tr><td>3</td><td>Service Line</td><td><span class="code">Cardiology</span> <span class="code">Ortho</span> <span class="code">WomensHealth</span> <span class="code">NA</span></td><td>Yes</td></tr>
+            <tr><td>4</td><td>Procedure</td><td><span class="code">GeneralPain</span> <span class="code">Mammography</span> <span class="code">LCSP</span> <span class="code">NA</span></td><td>Yes</td></tr>
+            <tr><td>5</td><td>Audience</td><td><span class="code">Pediatric</span> <span class="code">Provider</span> <span class="code">NA</span></td><td>Yes</td></tr>
+            <tr><td>6</td><td>Additional Identifier</td><td><span class="code">JewishVersion</span> <span class="code">Symposium</span> <span class="code">NA</span></td><td>Yes</td></tr>
+            <tr><td>7</td><td style="color:var(--teal);font-weight:600">Region ← New</td><td><span class="code">North</span> <span class="code">West</span> <span class="code">Westchester</span> <span class="code">ALL</span></td><td style="color:var(--teal);font-weight:600">Yes — mandatory</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- BENCHMARK THRESHOLDS -->
+    <div class="settings-section">
+      <div class="section-heading">Performance Benchmarks</div>
+      <div class="section-sub">Threshold values used for "On Track" and "Review" status indicators across dashboards</div>
+      <div class="setting-card">
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Email Open Rate Benchmark</div>
+            <div class="setting-desc">Campaigns below this are flagged for review</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select">
+              <option>28% (current)</option>
+              <option>25%</option>
+              <option>30%</option>
+              <option>32%</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">CPL Alert Threshold</div>
+            <div class="setting-desc">Campaigns above this CPL trigger a Review flag</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select">
+              <option>$65 (current)</option>
+              <option>$55</option>
+              <option>$75</option>
+              <option>$80</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Sync Lag Warning Threshold</div>
+            <div class="setting-desc">Minutes before a data source sync is flagged as lagging</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select">
+              <option>30 min (current)</option>
+              <option>15 min</option>
+              <option>60 min</option>
+              <option>2 hours</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- USER ACCESS -->
+    <div class="settings-section">
+      <div class="section-heading">User Access</div>
+      <div class="section-sub">Dashboard users and their access levels. Contact your MCI administrator to modify roles.</div>
+      <div class="setting-card">
+        <div class="user-row">
+          <div class="user-avatar">JC</div>
+          <div class="user-info"><div class="user-name">Jason Chae</div><div class="user-email">jchae@wmchealth.org</div></div>
+          <span class="role-badge role-admin">Admin</span>
+        </div>
+        <div class="user-row">
+          <div class="user-avatar" style="background:#8B5CF6">AC</div>
+          <div class="user-info"><div class="user-name">Andrew Chung</div><div class="user-email">achung@wmchealth.org</div></div>
+          <span class="role-badge role-admin">Admin</span>
+        </div>
+        <div class="user-row">
+          <div class="user-avatar" style="background:#E8A838">MK</div>
+          <div class="user-info"><div class="user-name">Marketing Team (Doret)</div><div class="user-email">team@doret.com</div></div>
+          <span class="role-badge role-editor">Editor</span>
+        </div>
+        <div class="user-row">
+          <div class="user-avatar" style="background:#2D9E5F">UP</div>
+          <div class="user-info"><div class="user-name">Paid Media Team (Unlock)</div><div class="user-email">team@unlockagency.com</div></div>
+          <span class="role-badge role-viewer">Viewer</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
