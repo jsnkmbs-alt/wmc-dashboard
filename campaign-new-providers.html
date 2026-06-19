@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WMC Health — New Providers Campaign</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0D2B45;
+  --teal: #0E7C7B;
+  --teal-light: #13A89E;
+  --gold: #E8A838;
+  --red: #C94040;
+  --green: #2D9E5F;
+  --bg: #F4F6F9;
+  --card: #FFFFFF;
+  --text: #1A2E3B;
+  --muted: #6B7E8E;
+  --border: #DDE3EA;
+  --sidebar-w: 220px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; font-size: 14px; }
+
+/* SIDEBAR */
+.sidebar { width: var(--sidebar-w); min-width: var(--sidebar-w); background: var(--navy); display: flex; flex-direction: column; position: sticky; top: 0; height: fit-content; min-height: 100vh; z-index: 100; flex-shrink: 0; }
+.sidebar-logo { padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.sidebar-logo .logo-mark { font-family: 'DM Serif Display', serif; font-size: 22px; color: #fff; line-height: 1; }
+.sidebar-logo .logo-sub { font-size: 10px; color: var(--teal-light); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 4px; }
+.sidebar-section { padding: 20px 16px 8px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.35); }
+.sidebar-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: rgba(255,255,255,0.6); cursor: pointer; border-radius: 8px; margin: 2px 8px; transition: all 0.2s; font-size: 13px; text-decoration: none; }
+.sidebar-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+.sidebar-item.active { background: var(--teal); color: #fff; }
+.sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 12px; color: rgba(255,255,255,0.4); }
+.sidebar-footer strong { display: block; color: rgba(255,255,255,0.7); }
+
+/* MAIN */
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+/* TOPBAR */
+.topbar { background: #fff; border-bottom: 1px solid var(--border); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; flex-wrap: wrap; gap: 10px; }
+.topbar-left h1 { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--navy); }
+.topbar-left p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+
+.live-badge { display: inline-flex; align-items: center; gap: 7px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 12.5px; color: var(--muted); }
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+.live-dot.pulsing { animation: pulse 2s infinite; }
+.live-dot.amber { background: var(--gold); }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(45,158,95,0.5); } 70% { box-shadow: 0 0 0 6px rgba(45,158,95,0); } 100% { box-shadow: 0 0 0 0 rgba(45,158,95,0); } }
+
+.btn-export { background: var(--teal); color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+.btn-export:hover { background: var(--teal-light); }
+.btn-export:disabled { opacity: 0.6; cursor: default; }
+
+/* CONTENT */
+.content { padding: 28px 32px; }
+
+.section-label { display: flex; align-items: baseline; gap: 10px; margin: 8px 0 16px; }
+.section-label:not(:first-child) { margin-top: 36px; }
+.section-label h2 { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--navy); }
+.section-tag { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 9px; border-radius: 20px; }
+.section-tag.live { background: #E6F7EE; color: #1A7A42; }
+.section-tag.pending { background: #FFF3D6; color: #9A6700; }
+.section-label .rule { flex: 1; height: 1px; background: var(--border); }
+
+/* KPI CARDS */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; }
+.kpi-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.kpi-card.teal::after { background: var(--teal); }
+.kpi-card.gold::after { background: var(--gold); }
+.kpi-card.green::after { background: var(--green); }
+.kpi-card.navy::after { background: var(--navy); }
+.kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 10px; }
+.kpi-value { font-family: 'DM Serif Display', serif; font-size: 30px; color: var(--navy); line-height: 1; font-variant-numeric: tabular-nums; }
+.kpi-meta { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 12px; color: var(--muted); }
+
+/* CHART ROWS */
+.chart-row { display: grid; gap: 16px; margin-bottom: 24px; }
+.chart-row.two-col { grid-template-columns: 2fr 1fr; }
+.chart-row.one-col { grid-template-columns: 1fr; }
+.chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.chart-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+.chart-title { font-weight: 600; font-size: 14px; color: var(--navy); }
+.chart-subtitle { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.chart-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 11px; color: var(--muted); }
+.legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+svg { width: 100%; overflow: visible; display: block; }
+
+/* TABLE */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 0 12px 10px; border-bottom: 1px solid var(--border); font-weight: 500; }
+.data-table td { padding: 11px 12px; font-size: 13px; border-bottom: 1px solid #F0F3F6; vertical-align: middle; font-variant-numeric: tabular-nums; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: #F9FAFB; }
+.data-table th.num, .data-table td.num { text-align: right; }
+.campaign-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; }
+.campaign-name-cell { display: flex; align-items: center; font-weight: 500; color: var(--navy); }
+.mini-bar-wrap { width: 80px; background: #EEF1F5; border-radius: 3px; height: 6px; display: inline-block; vertical-align: middle; margin-left: 8px; }
+.mini-bar { height: 6px; border-radius: 3px; }
+
+/* QR / EMPTY STATE */
+.qr-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 18px; }
+.qr-card { border: 1px dashed var(--border); border-radius: 10px; padding: 14px 16px; background: var(--bg); }
+.qr-card .qr-source { font-size: 11px; font-weight: 600; color: var(--gold); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+.qr-card .qr-region { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--navy); margin-bottom: 8px; }
+.qr-card .qr-code { font-size: 11px; color: var(--muted); font-family: ui-monospace, "SF Mono", Menlo, monospace; word-break: break-all; }
+.empty-state { text-align: center; padding: 26px 20px 14px; color: var(--muted); }
+.empty-state .icon { font-size: 24px; margin-bottom: 8px; }
+.empty-state .msg { font-size: 13px; max-width: 460px; margin: 0 auto; line-height: 1.5; }
+
+.error-box { background: #FDECEA; border: 1px solid #F0B8AE; color: #9B2020; border-radius: 10px; padding: 14px 16px; font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
+.error-box strong { display: block; margin-bottom: 4px; }
+
+.loading-row { text-align: center; padding: 30px; color: var(--muted); font-size: 13px; }
+
+@media (max-width: 900px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .chart-row.two-col { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">WMCHealth</div>
+    <div class="logo-sub">Marketing Intelligence</div>
+  </div>
+
+  <div class="sidebar-section">Overview</div>
+  <a href="index.html" class="sidebar-item">Dashboard</a>
+  <a href="campaign-roi.html" class="sidebar-item">Campaign ROI</a>
+  <a href="service-lines.html" class="sidebar-item">Service Lines</a>
+
+  <div class="sidebar-section">Campaigns</div>
+  <a href="campaign-new-providers.html" class="sidebar-item active">New Providers</a>
+
+  <div class="sidebar-section">Channels</div>
+  <a href="channel-email.html" class="sidebar-item">Email</a>
+  <a href="channel-paid-search.html" class="sidebar-item">Paid Search</a>
+  <a href="channel-social.html" class="sidebar-item">Social</a>
+  <a href="channel-organic.html" class="sidebar-item">Organic</a>
+
+  <div class="sidebar-section">Data</div>
+  <a href="data-salesforce-sync.html" class="sidebar-item">Salesforce Sync</a>
+  <a href="data-consent.html" class="sidebar-item">Consent Mgmt</a>
+  <a href="data-settings.html" class="sidebar-item">Settings</a>
+
+  <div class="sidebar-footer">
+    <strong>Jason Chae</strong>
+    Manager, Digital Analytics
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>New Providers Campaign</h1>
+      <p>Find-a-Doctor traffic from newsletter &amp; QR campaigns &middot; <span id="topbar-source">Source: Google Sheets</span></p>
+    </div>
+    <div class="topbar-right">
+      <span class="live-badge">
+        <span class="live-dot pulsing" id="live-dot"></span>
+        <span id="live-status">Loading live data&hellip;</span>
+      </span>
+      <button class="btn-export" id="refresh-btn">↻ Refresh</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div id="error-container"></div>
+
+    <!-- ===================== NEWSLETTER SECTION ===================== -->
+    <div class="section-label">
+      <h2>Newsletter Campaigns</h2>
+      <span class="section-tag live">Live · Google Sheets</span>
+      <div class="rule"></div>
+    </div>
+
+    <div class="kpi-grid" id="kpi-grid">
+      <div class="kpi-card teal">
+        <div class="kpi-label">Total Users</div>
+        <div class="kpi-value" id="kpi-total">—</div>
+        <div class="kpi-meta" id="kpi-total-sub">&nbsp;</div>
+      </div>
+      <div class="kpi-card gold">
+        <div class="kpi-label">Active Campaigns</div>
+        <div class="kpi-value" id="kpi-campaigns">—</div>
+        <div class="kpi-meta">currently sending traffic</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">Date Range</div>
+        <div class="kpi-value" id="kpi-range" style="font-size:18px;">—</div>
+        <div class="kpi-meta" id="kpi-range-sub">&nbsp;</div>
+      </div>
+      <div class="kpi-card navy">
+        <div class="kpi-label">Top Campaign</div>
+        <div class="kpi-value" id="kpi-top" style="font-size:16px;">—</div>
+        <div class="kpi-meta" id="kpi-top-sub">&nbsp;</div>
+      </div>
+    </div>
+
+    <div class="chart-row one-col">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Daily Users by Campaign</div>
+            <div class="chart-subtitle">Find-a-Doctor landing page sessions, by newsletter send</div>
+          </div>
+          <div class="chart-legend" id="chart-legend"></div>
+        </div>
+        <div id="chart-container"><div class="loading-row">Fetching chart data&hellip;</div></div>
+      </div>
+    </div>
+
+    <div class="chart-row one-col">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Campaign Breakdown</div>
+            <div class="chart-subtitle">Total users, share of traffic, and active days per campaign</div>
+          </div>
+        </div>
+        <div id="campaign-table-wrap"><div class="loading-row">Loading campaign totals&hellip;</div></div>
+      </div>
+    </div>
+
+    <!-- ===================== QR SECTION ===================== -->
+    <div class="section-label">
+      <h2>QR Code Campaigns</h2>
+      <span class="section-tag pending">Configured · Awaiting Data</span>
+      <div class="rule"></div>
+    </div>
+
+    <div class="chart-row one-col">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Digital Screen &amp; Popup Stand — Configured UTMs</div>
+            <div class="chart-subtitle">6 codes live across North, West, and Westchester regions</div>
+          </div>
+        </div>
+        <div id="qr-content"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG
+   ============================================================ */
+const SHEET_ID = "1bSz5cTCbnNYq4EkIe2cTvi3hZtIjmV1DWYsOYhxJWKw";
+const GID = "0"; // first tab — update if Newsletter data moves tabs
+const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
+
+const CAMPAIGN_COLORS = ["#0E7C7B", "#E8A838", "#8B5CF6", "#2D9E5F", "#C94040", "#3E7CB1"];
+
+/* ============================================================
+   QR DATA (static — embedded from QR_UTM_Generator.csv)
+   No hits recorded yet. Swap for a fetch() once this feeds a
+   live source, same pattern as the Newsletter section below.
+   ============================================================ */
+const QR_CAMPAIGNS = [
+  { source: "DigitalScreen", region: "North",       campaign: "NA_NA_NA_NewProviders_North" },
+  { source: "DigitalScreen", region: "West",        campaign: "NA_NA_NA_NewProviders_West" },
+  { source: "DigitalScreen", region: "Westchester",  campaign: "NA_NA_NA_NewProviders_Westchester" },
+  { source: "PopupStand",    region: "North",       campaign: "NA_NA_NA_NewProviders_North" },
+  { source: "PopupStand",    region: "West",        campaign: "NA_NA_NA_NewProviders_West" },
+  { source: "PopupStand",    region: "Westchester",  campaign: "NA_NA_NA_NewProviders_Westchester" },
+];
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function parseCSVProper(text) {
+  const lines = text.replace(/\r/g, "").split("\n").filter(l => l.length > 0);
+  const headers = lines[0].split(",").map(h => h.trim());
+  return lines.slice(1).map(line => {
+    const cells = line.split(",");
+    const row = {};
+    headers.forEach((h, idx) => row[h] = (cells[idx] !== undefined ? cells[idx].trim() : ""));
+    return row;
+  });
+}
+
+function formatDate(yyyymmdd) {
+  const s = String(yyyymmdd);
+  if (s.length !== 8) return s;
+  const m = parseInt(s.slice(4,6),10)-1, d = parseInt(s.slice(6,8),10);
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${months[m]} ${d}`;
+}
+
+function formatDateLong(yyyymmdd) {
+  const s = String(yyyymmdd);
+  if (s.length !== 8) return s;
+  const y = s.slice(0,4), m = parseInt(s.slice(4,6),10)-1, d = parseInt(s.slice(6,8),10);
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  return `${months[m]} ${d}, ${y}`;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function cleanCampaignName(name) {
+  if (name.startsWith("WMC_FY26_NA_NA_NA_")) return name.replace("WMC_FY26_NA_NA_NA_", "");
+  return name;
+}
+
+/* ============================================================
+   RENDER: KPI CARDS
+   ============================================================ */
+function renderKPIs(rows) {
+  const totalUsers = rows.reduce((sum, r) => sum + (parseInt(r.totalUsers, 10) || 0), 0);
+  const campaigns = [...new Set(rows.map(r => r.sessionCampaignName))];
+  const dates = rows.map(r => r.date).sort();
+  const minDate = dates[0], maxDate = dates[dates.length - 1];
+
+  const byCampaign = {};
+  rows.forEach(r => { byCampaign[r.sessionCampaignName] = (byCampaign[r.sessionCampaignName] || 0) + (parseInt(r.totalUsers,10) || 0); });
+  const topCampaign = Object.entries(byCampaign).sort((a,b) => b[1]-a[1])[0];
+
+  document.getElementById('kpi-total').textContent = totalUsers.toLocaleString();
+  document.getElementById('kpi-total-sub').textContent = `across ${rows.length} sessions logged`;
+  document.getElementById('kpi-campaigns').textContent = campaigns.length;
+  document.getElementById('kpi-range').textContent = `${formatDate(minDate)} – ${formatDate(maxDate)}`;
+  document.getElementById('kpi-range-sub').textContent = `${[...new Set(dates)].length} days of data`;
+
+  if (topCampaign) {
+    const el = document.getElementById('kpi-top');
+    el.textContent = cleanCampaignName(topCampaign[0]);
+    el.title = topCampaign[0];
+    document.getElementById('kpi-top-sub').textContent = `${topCampaign[1]} users`;
+  }
+}
+
+/* ============================================================
+   RENDER: CHART
+   ============================================================ */
+function renderChart(rows) {
+  const campaigns = [...new Set(rows.map(r => r.sessionCampaignName))];
+  const dates = [...new Set(rows.map(r => r.date))].sort();
+
+  const matrix = {};
+  dates.forEach(d => { matrix[d] = {}; campaigns.forEach(c => matrix[d][c] = 0); });
+  rows.forEach(r => { matrix[r.date][r.sessionCampaignName] += (parseInt(r.totalUsers,10) || 0); });
+
+  const W = 1040, H = 280;
+  const padL = 40, padR = 16, padT = 16, padB = 32;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+
+  const maxVal = Math.max(...dates.map(d => Math.max(...campaigns.map(c => matrix[d][c]))), 1);
+  const niceMax = Math.ceil(maxVal / 10) * 10 || 10;
+
+  const xStep = dates.length > 1 ? plotW / (dates.length - 1) : 0;
+  const yScale = v => padT + plotH - (v / niceMax) * plotH;
+  const xScale = i => padL + i * xStep;
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+
+  const gridCount = 4;
+  for (let i = 0; i <= gridCount; i++) {
+    const val = (niceMax / gridCount) * i;
+    const y = yScale(val);
+    svg += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#EEF1F5" stroke-width="1"/>`;
+    svg += `<text x="${padL-8}" y="${y+3}" fill="#6B7E8E" font-size="10" font-family="DM Sans" text-anchor="end">${Math.round(val)}</text>`;
+  }
+
+  const labelEvery = Math.max(1, Math.ceil(dates.length / 10));
+  dates.forEach((d, i) => {
+    if (i % labelEvery === 0 || i === dates.length - 1) {
+      svg += `<text x="${xScale(i)}" y="${H-10}" fill="#6B7E8E" font-size="10" font-family="DM Sans" text-anchor="middle">${formatDate(d)}</text>`;
+    }
+  });
+
+  campaigns.forEach((c, ci) => {
+    const color = CAMPAIGN_COLORS[ci % CAMPAIGN_COLORS.length];
+    let path = "";
+    dates.forEach((d, i) => {
+      const x = xScale(i), y = yScale(matrix[d][c]);
+      path += (i === 0 ? "M" : "L") + x.toFixed(1) + "," + y.toFixed(1) + " ";
+    });
+    svg += `<path d="${path}" fill="none" stroke="${color}" stroke-width="2.25" stroke-linejoin="round" stroke-linecap="round" opacity="0.92" />`;
+    dates.forEach((d, i) => {
+      if (matrix[d][c] > 0) {
+        svg += `<circle cx="${xScale(i)}" cy="${yScale(matrix[d][c])}" r="2.75" fill="${color}"><title>${escapeHtml(cleanCampaignName(c))}: ${matrix[d][c]} on ${formatDateLong(d)}</title></circle>`;
+      }
+    });
+  });
+
+  svg += `</svg>`;
+  document.getElementById('chart-container').innerHTML = svg;
+
+  let legendHtml = "";
+  campaigns.forEach((c, ci) => {
+    const color = CAMPAIGN_COLORS[ci % CAMPAIGN_COLORS.length];
+    legendHtml += `<span><span class="legend-dot" style="background:${color}"></span>${escapeHtml(cleanCampaignName(c))}</span>`;
+  });
+  document.getElementById('chart-legend').innerHTML = legendHtml;
+}
+
+/* ============================================================
+   RENDER: CAMPAIGN TABLE
+   ============================================================ */
+function renderTable(rows) {
+  const byCampaign = {};
+  rows.forEach(r => {
+    const c = r.sessionCampaignName;
+    if (!byCampaign[c]) byCampaign[c] = { total: 0, days: new Set() };
+    byCampaign[c].total += (parseInt(r.totalUsers,10) || 0);
+    byCampaign[c].days.add(r.date);
+  });
+
+  const grandTotal = Object.values(byCampaign).reduce((s,v) => s + v.total, 0);
+  const sorted = Object.entries(byCampaign).sort((a,b) => b[1].total - a[1].total);
+  const colorMap = {};
+  [...new Set(rows.map(r => r.sessionCampaignName))].forEach((c, i) => colorMap[c] = CAMPAIGN_COLORS[i % CAMPAIGN_COLORS.length]);
+
+  let html = `<table class="data-table">
+    <thead><tr>
+      <th>Campaign</th>
+      <th class="num">Users</th>
+      <th class="num">Share</th>
+      <th class="num">Active Days</th>
+    </tr></thead><tbody>`;
+
+  sorted.forEach(([name, data]) => {
+    const pct = grandTotal > 0 ? (data.total / grandTotal * 100) : 0;
+    html += `<tr>
+      <td><div class="campaign-name-cell" title="${escapeHtml(name)}"><span class="campaign-dot" style="background:${colorMap[name]}"></span>${escapeHtml(cleanCampaignName(name))}</div></td>
+      <td class="num"><strong>${data.total.toLocaleString()}</strong></td>
+      <td class="num">${pct.toFixed(1)}%<span class="mini-bar-wrap"><span class="mini-bar" style="width:${pct.toFixed(1)}%;background:${colorMap[name]}"></span></span></td>
+      <td class="num">${data.days.size}</td>
+    </tr>`;
+  });
+
+  html += `</tbody></table>`;
+  document.getElementById('campaign-table-wrap').innerHTML = html;
+}
+
+/* ============================================================
+   RENDER: QR SECTION
+   ============================================================ */
+function renderQR() {
+  let html = `<div class="qr-grid">`;
+  QR_CAMPAIGNS.forEach(q => {
+    html += `<div class="qr-card">
+      <div class="qr-source">${escapeHtml(q.source)}</div>
+      <div class="qr-region">${escapeHtml(q.region)}</div>
+      <div class="qr-code">${escapeHtml(q.campaign)}</div>
+    </div>`;
+  });
+  html += `</div>`;
+  html += `<div class="empty-state">
+    <div class="icon">📭</div>
+    <div class="msg">No scans recorded yet across these 6 codes. This section will switch to live charts and a breakdown table automatically once traffic starts coming in — same format as the Newsletter section above.</div>
+  </div>`;
+  document.getElementById('qr-content').innerHTML = html;
+}
+
+/* ============================================================
+   MAIN: FETCH + ORCHESTRATE
+   ============================================================ */
+async function loadDashboard() {
+  const liveStatus = document.getElementById('live-status');
+  const liveDot = document.getElementById('live-dot');
+  const refreshBtn = document.getElementById('refresh-btn');
+  const errorContainer = document.getElementById('error-container');
+
+  refreshBtn.disabled = true;
+  liveStatus.textContent = "Refreshing\u2026";
+  liveDot.className = 'live-dot pulsing';
+  errorContainer.innerHTML = "";
+
+  try {
+    const res = await fetch(CSV_URL + `&_=${Date.now()}`, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Sheet responded with status ${res.status}`);
+    const text = await res.text();
+
+    if (text.trim().startsWith("<")) throw new Error("PERMISSIONS");
+
+    const rows = parseCSVProper(text).filter(r => r.date && r.sessionCampaignName);
+    if (rows.length === 0) throw new Error("EMPTY");
+
+    renderKPIs(rows);
+    renderChart(rows);
+    renderTable(rows);
+
+    const now = new Date();
+    liveStatus.textContent = `Live — ${now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
+    document.getElementById('topbar-source').textContent = `Source: Google Sheets · refreshed ${now.toLocaleString([], {dateStyle:'medium', timeStyle:'short'})}`;
+
+  } catch (err) {
+    liveDot.className = 'live-dot amber';
+    liveStatus.textContent = "Live data unavailable";
+
+    let msg = "";
+    if (String(err.message).includes("PERMISSIONS")) {
+      msg = `This dashboard couldn't read the Google Sheet. Make sure sharing is set to <strong>"Anyone with the link — Viewer"</strong>, then hit Refresh.`;
+    } else if (String(err.message).includes("EMPTY")) {
+      msg = `The sheet returned no rows. Check that tab <strong>gid=${GID}</strong> still contains the Newsletter data.`;
+    } else {
+      msg = `Fetch failed: ${escapeHtml(err.message)}. If this page is being opened from a local file rather than a hosted URL, browsers block the live request — host it (e.g. via GitHub Pages) for the live pull to work.`;
+    }
+    errorContainer.innerHTML = `<div class="error-box"><strong>Live data unavailable</strong>${msg}</div>`;
+    document.getElementById('chart-container').innerHTML = `<div class="loading-row">No data to display.</div>`;
+    document.getElementById('campaign-table-wrap').innerHTML = `<div class="loading-row">No data to display.</div>`;
+  } finally {
+    refreshBtn.disabled = false;
+  }
+}
+
+document.getElementById('refresh-btn').addEventListener('click', loadDashboard);
+
+renderQR();
+loadDashboard();
+</script>
+</body>
+</html>
